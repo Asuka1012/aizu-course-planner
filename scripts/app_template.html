@@ -15,9 +15,9 @@
   --gold:#c9a24a; --gold-text:#8a6a1f; --gold-on-navy:#e4c878; --gold-dim:#f7efdc;
   --danger:#ad3f38; --danger-dim:#f7e8e6;
   /* フィールド推奨(field)と教員免許必修(license)は基本推奨(gold)・紺と混同・埋没
-     しないよう、それぞれ独立した色を使う（テラコッタ / ティール）。gold と同じ
+     しないよう、それぞれ独立した色を使う（グリーン / ティール）。gold と同じ
      3段階（アクセント本体／濃い-文字用／薄い-紺地の文字用）で揃える。 */
-  --field-accent:#b3652f; --field-text:#8a4a1f; --field-on-navy:#e8a67d;
+  --field-accent:#2f8a3d; --field-text:#1f5c29; --field-on-navy:#7ed48a;
   --license-accent:#0f8f82; --license-text:#0d6d63; --license-on-navy:#5eead4;
   --radius:4px; --shadow:0 1px 3px rgba(27,42,74,.1);
   --header-bg:#1b2a4a; --header-text:#f7f5f0;
@@ -298,9 +298,6 @@ footer.app-footer{text-align:center; color:var(--text-dim); font-size:.75rem; pa
     <div id="search-banners"></div>
     <div class="search-row" style="align-items:center;">
       <input type="text" id="search-input" placeholder="科目コード・科目名（日本語/English）で検索するとハイライトされます / Search highlights matching courses">
-      <label style="display:flex; align-items:center; gap:.35rem; white-space:nowrap;">
-        <input type="checkbox" id="f-show-te">教職課程科目を表示
-      </label>
     </div>
     <div class="tl-legend">
       <span><span class="tl-swatch basic"></span>基本推奨</span>
@@ -1116,7 +1113,6 @@ function showConfirm(message, onConfirm){
 function renderTimelinePlanner(){
   renderSearchBanners();
   const query = document.getElementById("search-input").value.trim().toLowerCase();
-  const showTE = document.getElementById("f-show-te").checked;
   const autoCompleted = autoCompletedCourseIds(STATE.setup);
   const halfTotals = computeHalfYearTotals();
   const licenseCodes = licenseRelevantCodes();
@@ -1148,7 +1144,7 @@ function renderTimelinePlanner(){
   grid.style.setProperty("--tl-header-h", grid.querySelector(".tl-head.corner").getBoundingClientRect().height+"px");
 
   TIMELINE_GROUPS.forEach(group=>{
-    const rows = TIMELINE_ROWS.filter(r=>group.rowLabels.includes(r.label) && (!r.teacherOnly || (STATE.setup.teacherLicenses||[]).length || showTE));
+    const rows = TIMELINE_ROWS.filter(r=>group.rowLabels.includes(r.label) && (!r.teacherOnly || (STATE.setup.teacherLicenses||[]).length));
     if(!rows.length) return;
     const collapsed = collapsedGroups.has(group.label);
     const groupHeader = document.createElement("div");
@@ -1237,7 +1233,6 @@ function renderTimelinePlanner(){
   if(wrap){ wrap.scrollTop = prevScrollTop; wrap.scrollLeft = prevScrollLeft; }
 }
 document.getElementById("search-input").addEventListener("input", renderTimelinePlanner);
-document.getElementById("f-show-te").addEventListener("change", renderTimelinePlanner);
 
 /* ======================= TIMETABLE view ======================= */
 function renderTimetable(){
