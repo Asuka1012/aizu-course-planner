@@ -201,16 +201,19 @@ select,input[type=text]{
   border-radius:2px; padding:.2rem .45rem .2rem .5rem; font-size:.72rem; font-weight:700; cursor:pointer; line-height:1.3;
   border:1px solid var(--border); border-left:4px solid var(--border); background:var(--panel); max-width:100%;
 }
-.tl-chip.avail{background:transparent; border-color:var(--text-dim); color:var(--text-dim); font-weight:600;}
-.tl-chip.avail:hover{border-color:var(--accent); color:var(--text);}
-.tl-chip.avail.basic{border-left-color:var(--gold); border-left-style:solid; color:var(--gold-text);}
-.tl-chip.avail.field{border-left-color:var(--field-accent); border-left-width:4px; color:var(--field-text);}
+/* 未選択・非推奨の科目は目立たせすぎない一方、基本推奨・フィールド推奨は
+   今までの「選択可能」科目と同じ視認性を保つ（opacityで重み付け）。 */
+.tl-chip.avail{background:transparent; border-color:var(--text-dim); color:var(--text-dim); font-weight:600; opacity:.4;}
+.tl-chip.avail:hover{border-color:var(--accent); color:var(--text); opacity:1;}
+.tl-chip.avail.basic{border-left-color:var(--gold); border-left-style:solid; color:var(--gold-text); opacity:1;}
+.tl-chip.avail.field{border-left-color:var(--field-accent); border-left-width:4px; color:var(--field-text); opacity:1;}
 .tl-chip.selected{background:var(--accent); border-color:var(--accent); color:var(--gold-on-navy);}
 .tl-chip.selected.basic{border-left-color:var(--gold);}
 .tl-chip.selected.field{border-left:3px solid var(--field-accent);}
-.tl-chip.auto{background:var(--bg); border-color:var(--border); color:var(--text-dim); cursor:default;}
-.tl-chip.prereq-highlight{outline:3px solid #c026d3; outline-offset:1px;}
-.tl-chip.license-required{box-shadow:inset 3px 0 0 var(--license-accent);}
+/* 履修済み(自動カウント)は目立たなさすぎたので、選択済みと同じ紺の塗りに統一 */
+.tl-chip.auto{background:var(--accent); color:var(--gold-on-navy); border-color:var(--accent); cursor:default;}
+.tl-chip.prereq-highlight{outline:3px solid #c026d3; outline-offset:1px; opacity:1;}
+.tl-chip.license-required{box-shadow:inset 3px 0 0 var(--license-accent); opacity:1;}
 .tl-chip.selected.tentative{background:transparent; color:var(--text);}
 .tl-fixed-row{grid-column:2 / -1; padding:.6rem; font-size:.82rem; color:var(--text-dim); border-bottom:1px solid var(--border);}
 
