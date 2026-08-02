@@ -18,8 +18,8 @@
      色を使う（レッド / グリーン / ブルー）。3段階（アクセント本体／濃い-文字用／
      薄い-紺地の文字用）で揃える。 */
   --basic-accent:#c0392b; --basic-text:#8a291e; --basic-on-navy:#f0a99e;
-  --field-accent:#2f8a3d; --field-text:#1f5c29; --field-on-navy:#7ed48a;
-  --license-accent:#2f5d8a; --license-text:#1f3d5c; --license-on-navy:#8fb8dd;
+  --field-accent:#34a853; --field-text:#1e7a3c; --field-on-navy:#8fe0a3;
+  --license-accent:#2e75d6; --license-text:#1a4c8f; --license-on-navy:#9dc4f5;
   --radius:4px; --shadow:0 1px 3px rgba(27,42,74,.1);
   --header-bg:#1b2a4a; --header-text:#f7f5f0;
   /* タイムラインの学年別カラム - 色相を増やさず、紺の濃淡だけで学年を分ける */
@@ -130,7 +130,7 @@ select,input[type=text]{
 .tt-grid .tt-period{background:var(--bg); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--text-dim);}
 .tt-course{border-radius:2px; padding:.2rem .35rem .2rem .45rem; margin-bottom:.2rem; background:var(--accent); color:var(--gold-on-navy); border:1px solid var(--accent); font-weight:700; line-height:1.25;}
 .tt-course.basic{border-left:4px solid var(--basic-accent);}
-.tt-course.field{border-left:3px solid var(--field-accent);}
+.tt-course.field{border-left:4px solid var(--field-accent);}
 .tt-course.conflict{outline:2px solid var(--danger);}
 .tt-course.tentative{background:transparent; color:var(--text);}
 .tt-course.tentative .room{color:var(--text-dim);}
@@ -147,7 +147,7 @@ select,input[type=text]{
   border:1px solid var(--accent); border-radius:2px; padding:.15rem .5rem; margin-bottom:.2rem; font-size:.74rem;
 }
 .plan-chip.basic{border-left:4px solid var(--basic-accent);}
-.plan-chip.field{border-left:3px solid var(--field-accent);}
+.plan-chip.field{border-left:4px solid var(--field-accent);}
 .plan-chip.tentative{background:transparent; color:var(--text);}
 .plan-chip .x{cursor:pointer; color:inherit; font-weight:800; opacity:.7;}
 .plan-chip .x:hover{opacity:1;}
@@ -174,7 +174,7 @@ select,input[type=text]{
 .tl-swatch.avail{border-color:var(--text-dim);}
 .tl-swatch.tentative{background:transparent; border-color:var(--accent); border-left-width:2px;}
 .tl-swatch.prereq{border-color:#c026d3; box-shadow:0 0 0 2px #c026d3 inset;}
-.tl-swatch.license{box-shadow:inset 3px 0 0 var(--license-accent);}
+.tl-swatch.license{box-shadow:inset 4px 0 0 var(--license-accent);}
 .tl-wrap{overflow:auto; max-height:72vh; border:1px solid var(--border); border-radius:8px;}
 .tl-grid{display:grid; grid-template-columns:170px repeat(8, minmax(150px,1fr)); min-width:1400px;}
 .tl-head{position:sticky; top:0; z-index:5; padding:.5rem .4rem; text-align:center; font-weight:800; font-size:.78rem; border-bottom:2px solid var(--border); border-left:1px solid var(--border);}
@@ -211,11 +211,11 @@ select,input[type=text]{
 .tl-chip.avail.field{border-left-color:var(--field-accent); border-left-width:4px; color:var(--field-text); opacity:1;}
 .tl-chip.selected{background:var(--accent); border-color:var(--accent); color:var(--gold-on-navy);}
 .tl-chip.selected.basic{border-left-color:var(--basic-accent);}
-.tl-chip.selected.field{border-left:3px solid var(--field-accent);}
+.tl-chip.selected.field{border-left:4px solid var(--field-accent);}
 /* 履修済み(自動カウント)は目立たなさすぎたので、選択済みと同じ紺の塗りに統一 */
 .tl-chip.auto{background:var(--accent); color:var(--gold-on-navy); border-color:var(--accent); cursor:default;}
 .tl-chip.prereq-highlight{outline:3px solid #c026d3; outline-offset:1px; opacity:1;}
-.tl-chip.license-required{box-shadow:inset 3px 0 0 var(--license-accent); opacity:1;}
+.tl-chip.license-required{box-shadow:inset 4px 0 0 var(--license-accent); opacity:1;}
 .tl-chip.selected.tentative{background:transparent; color:var(--text);}
 .tl-fixed-row{grid-column:2 / -1; padding:.6rem; font-size:.82rem; color:var(--text-dim); border-bottom:1px solid var(--border);}
 
