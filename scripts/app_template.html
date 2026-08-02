@@ -14,6 +14,11 @@
   --accent:#1b2a4a; --accent-dim:#e9edf4; --accent-text:#ffffff;
   --gold:#c9a24a; --gold-text:#8a6a1f; --gold-on-navy:#e4c878; --gold-dim:#f7efdc;
   --danger:#ad3f38; --danger-dim:#f7e8e6;
+  /* フィールド推奨(field)と教員免許必修(license)は基本推奨(gold)・紺と混同・埋没
+     しないよう、それぞれ独立した色を使う（テラコッタ / ティール）。gold と同じ
+     3段階（アクセント本体／濃い-文字用／薄い-紺地の文字用）で揃える。 */
+  --field-accent:#b3652f; --field-text:#8a4a1f; --field-on-navy:#e8a67d;
+  --license-accent:#0f8f82; --license-text:#0d6d63; --license-on-navy:#5eead4;
   --radius:4px; --shadow:0 1px 3px rgba(27,42,74,.1);
   --header-bg:#1b2a4a; --header-text:#f7f5f0;
   /* タイムラインの学年別カラム - 色相を増やさず、紺の濃淡だけで学年を分ける */
@@ -100,7 +105,7 @@ select,input[type=text]{
 .banner .banner-title{font-weight:800; margin-bottom:.2rem;}
 .badge{display:inline-block; font-size:.7rem; font-weight:800; border-radius:3px; padding:.1rem .45rem; margin-left:.3rem; white-space:nowrap; letter-spacing:.02em;}
 .badge.basic{color:var(--accent); background:var(--gold);}
-.badge.field{color:var(--gold-text); background:transparent; border:1px solid var(--gold);}
+.badge.field{color:var(--field-text); background:transparent; border:1px solid var(--field-accent);}
 .badge.te{color:var(--text-dim); background:transparent; border:1px solid var(--border);}
 
 .search-row{display:flex; gap:.6rem; margin-bottom:.6rem; flex-wrap:wrap;}
@@ -124,7 +129,7 @@ select,input[type=text]{
 .tt-grid .tt-period{background:var(--bg); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--text-dim);}
 .tt-course{border-radius:2px; padding:.2rem .35rem .2rem .45rem; margin-bottom:.2rem; background:var(--accent); color:var(--gold-on-navy); border:1px solid var(--accent); font-weight:700; line-height:1.25;}
 .tt-course.basic{border-left:4px solid var(--gold);}
-.tt-course.field{border-left:2px solid var(--gold);}
+.tt-course.field{border-left:3px solid var(--field-accent);}
 .tt-course.conflict{outline:2px solid var(--danger);}
 .tt-course.tentative{background:transparent; color:var(--text);}
 .tt-course.tentative .room{color:var(--text-dim);}
@@ -141,7 +146,7 @@ select,input[type=text]{
   border:1px solid var(--accent); border-radius:2px; padding:.15rem .5rem; margin-bottom:.2rem; font-size:.74rem;
 }
 .plan-chip.basic{border-left:4px solid var(--gold);}
-.plan-chip.field{border-left:2px solid var(--gold);}
+.plan-chip.field{border-left:3px solid var(--field-accent);}
 .plan-chip.tentative{background:transparent; color:var(--text);}
 .plan-chip .x{cursor:pointer; color:inherit; font-weight:800; opacity:.7;}
 .plan-chip .x:hover{opacity:1;}
@@ -163,11 +168,11 @@ select,input[type=text]{
 .tl-legend span{display:inline-flex; align-items:center; gap:.35rem;}
 .tl-swatch{width:14px; height:14px; border-radius:2px; display:inline-block; background:var(--bg); border:2px solid var(--border); border-left-width:4px;}
 .tl-swatch.basic{border-left-color:var(--gold);}
-.tl-swatch.field{border-left-color:var(--gold); border-left-width:2px;}
+.tl-swatch.field{border-left-color:var(--field-accent); border-left-width:4px;}
 .tl-swatch.selected{background:var(--accent); border-color:var(--accent);}
 .tl-swatch.avail{border-color:var(--text-dim);}
 .tl-swatch.prereq{border-color:#c026d3; box-shadow:0 0 0 2px #c026d3 inset;}
-.tl-swatch.license{box-shadow:inset 3px 0 0 #7c3aed;}
+.tl-swatch.license{box-shadow:inset 3px 0 0 var(--license-accent);}
 .tl-wrap{overflow:auto; max-height:72vh; border:1px solid var(--border); border-radius:8px;}
 .tl-grid{display:grid; grid-template-columns:170px repeat(8, minmax(150px,1fr)); min-width:1400px;}
 .tl-head{position:sticky; top:0; z-index:5; padding:.5rem .4rem; text-align:center; font-weight:800; font-size:.78rem; border-bottom:2px solid var(--border); border-left:1px solid var(--border);}
@@ -199,13 +204,13 @@ select,input[type=text]{
 .tl-chip.avail{background:transparent; border-color:var(--text-dim); color:var(--text-dim); font-weight:600;}
 .tl-chip.avail:hover{border-color:var(--accent); color:var(--text);}
 .tl-chip.avail.basic{border-left-color:var(--gold); border-left-style:solid; color:var(--gold-text);}
-.tl-chip.avail.field{border-left-color:var(--gold); border-left-width:2px; color:var(--gold-text);}
+.tl-chip.avail.field{border-left-color:var(--field-accent); border-left-width:4px; color:var(--field-text);}
 .tl-chip.selected{background:var(--accent); border-color:var(--accent); color:var(--gold-on-navy);}
 .tl-chip.selected.basic{border-left-color:var(--gold);}
-.tl-chip.selected.field{border-left:2px solid var(--gold);}
+.tl-chip.selected.field{border-left:3px solid var(--field-accent);}
 .tl-chip.auto{background:var(--bg); border-color:var(--border); color:var(--text-dim); cursor:default;}
 .tl-chip.prereq-highlight{outline:3px solid #c026d3; outline-offset:1px;}
-.tl-chip.license-required{box-shadow:inset 3px 0 0 #7c3aed;}
+.tl-chip.license-required{box-shadow:inset 3px 0 0 var(--license-accent);}
 .tl-chip.selected.tentative{background:transparent; color:var(--text);}
 .tl-fixed-row{grid-column:2 / -1; padding:.6rem; font-size:.82rem; color:var(--text-dim); border-bottom:1px solid var(--border);}
 
@@ -256,7 +261,7 @@ footer.app-footer{text-align:center; color:var(--text-dim); font-size:.75rem; pa
       <div>
         <label class="field-label">Eクラス / E-Class（任意・自由入力）</label>
         <input type="text" id="input-eclass" placeholder="例: 3E5">
-        <div class="hint">語学系科目の少人数クラスラベル。複合ラベル（例: 1E2-2E2）に対応するため自由入力です。</div>
+        <div class="hint">語学系科目の少人数クラスラベル。</div>
       </div>
     </div>
     <div style="margin-top:1rem;">
@@ -277,7 +282,7 @@ footer.app-footer{text-align:center; color:var(--text-dim); font-size:.75rem; pa
         <label><input type="checkbox" value="math_hs"><span>高校数学</span></label>
         <label><input type="checkbox" value="info_hs"><span>高校情報</span></label>
       </div>
-      <div class="hint">教職に関する科目の単位は卒業必要単位（128単位）には含めず、別集計で表示します。取得を目指す免許状を選ぶと、卒業要件ダッシュボードに免許ごとの必要単位の進捗が表示され、その免許の必修科目（●・○印の科目）は自動的に履修計画へ登録されます。</div>
+      <div class="hint">取得を目指す免許状を選ぶと、卒業要件ダッシュボードに免許ごとの必要単位の進捗が表示され、その免許の必修科目（●・○印の科目）は自動的に履修計画へ登録されます。</div>
     </div>
     <div style="margin-top:1.2rem;">
       <button class="btn primary" id="btn-save-setup">設定を保存して開始 / Save &amp; Start</button>
@@ -806,7 +811,7 @@ document.getElementById("btn-save-setup").addEventListener("click", ()=>{
   autoRegisterLicenseMandatoryCourses();
   saveState();
   document.getElementById("setup-status").textContent = "保存しました ✓ / Saved";
-  showView("plan");
+  showView("search");
 });
 
 /* ======================= TIMELINE PLANNER (course selection) view =======================
@@ -935,7 +940,7 @@ function courseRecommendationBadges(course){
   if(hasBasic) html += '<span class="badge basic" title="基本推奨科目（履修計画に追加しなくても卒業要件に自動カウントされます）">基本推奨</span>';
   if(hasField) html += '<span class="badge field" title="フィールド推奨科目">Field推奨</span>';
   if(course.category.major==="教職に関する専門科目") html += '<span class="badge te">教職</span>';
-  if(licenseRelevantCodes().has(course.code)) html += '<span class="badge" style="background:#7c3aed;color:#fff;" title="選択中の教員免許状の必要科目">免許</span>';
+  if(licenseRelevantCodes().has(course.code)) html += '<span class="badge" style="background:var(--license-accent);color:#fff;" title="選択中の教員免許状の必要科目">免許</span>';
   return html;
 }
 function renderSearchBanners(){
