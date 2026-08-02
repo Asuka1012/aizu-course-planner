@@ -1244,36 +1244,34 @@ function renderTimetable(){
   const autoInfoEl = document.getElementById("tt-auto-info");
   const unscheduledEl = document.getElementById("tt-unscheduled");
 
-  // Year1 Q1/Q2 is assigned directly by the university - there is no weekly
-  // schedule for the student to browse or choose from for the mandatory
-  // courses, so show a summary instead of an (mostly empty/misleading) grid.
-  if(year===AUTO_COMPLETE_YEAR && AUTO_COMPLETE_QUARTERS.includes(quarter)){
-    gridEl.classList.add("hidden");
-    unscheduledEl.textContent = "";
+  // Year1 Q1/Q2 is assigned directly by the university - the student never
+  // registers for it, but it's still a real weekly schedule, so show the
+  // actual grid (built from the same matched timetable offerings as any
+  // other quarter) with a reminder banner on top, rather than hiding it.
+  const isAutoQuarter = year===AUTO_COMPLETE_YEAR && AUTO_COMPLETE_QUARTERS.includes(quarter);
+  if(isAutoQuarter){
     autoInfoEl.classList.remove("hidden");
-    const autoCourses = Array.from(autoCompletedCourseIdsForQuarter(STATE.setup, quarter)).map(id=>coursesById.get(id)).filter(Boolean);
-    const electives = placementsFor(year, quarter).map(p=>coursesById.get(p.courseId)).filter(Boolean);
     autoInfoEl.innerHTML = `
       <div class="banner field">
         <div class="banner-body">
-          <div class="banner-title">1年 第${quarter}学期は大学側の標準クラス編成のため時間割はありません</div>
-          <div>基本推奨科目は自動的に履修済みとしてカウントされます。この学期に選べるのは自由科目・課外プロジェクト・集中講義です（「科目を探す」から追加できます）。</div>
+          <div class="banner-title">1年 第${quarter}学期は大学側の標準クラス編成です</div>
+          <div>基本推奨科目は自動的に履修済みとしてカウントされます（登録操作は不要です）。下記は実際の時間割です。自由科目・課外プロジェクト・集中講義は「科目を探す」から追加できます。</div>
         </div>
       </div>
-      <div class="hint" style="margin:.6rem 0 .3rem;font-weight:700;">自動履修済み（${autoCourses.reduce((s,c)=>s+(c.credits||0),0)}単位）</div>
-      <div class="course-list">${autoCourses.map(c=>`<div class="course-card"><b>${c.code}</b> ${c.name_ja} <span class="hint">(${c.credits}単位)</span></div>`).join("") || '<div class="hint">なし</div>'}</div>
-      ${electives.length ? `<div class="hint" style="margin:.8rem 0 .3rem;font-weight:700;">選択した自由科目・課外プロジェクト・集中講義</div>
-      <div class="course-list">${electives.map(c=>`<div class="course-card"><b>${c.code}</b> ${c.name_ja} <span class="hint">(${c.credits}単位)</span></div>`).join("")}</div>` : ""}
     `;
-    return;
+  } else {
+    autoInfoEl.classList.add("hidden");
+    autoInfoEl.innerHTML = "";
   }
   gridEl.classList.remove("hidden");
-  autoInfoEl.classList.add("hidden");
 
   const placements = placementsFor(year, quarter);
+  const autoEntries = isAutoQuarter
+    ? Array.from(autoCompletedCourseIdsForQuarter(STATE.setup, quarter)).map(id=>({courseId:id, id:null, status:"confirmed"}))
+    : [];
   const cellMap = new Map(); // "day-period" -> [{course,entry}]
   const unresolved = [];
-  placements.forEach(p=>{
+  [...autoEntries, ...placements].forEach(p=>{
     const course = coursesById.get(p.courseId);
     if(!course) return;
     // Intensive/block-format courses (集中講義, quarter:[]) don't occupy a
