@@ -1,0 +1,79 @@
+{
+ "source_note": "会津大学 2025年度キャンパスガイド 43-44ページ（教育職員免許法施行規則第22条の6に規定する情報）に基づく。2019年度以降入学生対象。",
+ "licenses": {
+  "math_jhs": {
+   "name_ja": "中学校教諭一種免許状（数学）",
+   "name_en": "Junior High School Teaching License (Mathematics)",
+   "subject_category_min": 28,
+   "basic_understanding_min": 31,
+   "combined_min": 59,
+   "teaching_method_min": 8,
+   "teaching_method_courses": ["TE06", "TE07", "TE08", "TE09"],
+   "moral_education_required": true
+  },
+  "math_hs": {
+   "name_ja": "高等学校教諭一種免許状（数学）",
+   "name_en": "High School Teaching License (Mathematics)",
+   "subject_category_min": 26,
+   "basic_understanding_min": 27,
+   "combined_min": 59,
+   "teaching_method_min": 6,
+   "teaching_method_courses": ["TE06", "TE08", "TE09"],
+   "moral_education_required": false
+  },
+  "info_hs": {
+   "name_ja": "高等学校教諭一種免許状（情報）",
+   "name_en": "High School Teaching License (Information)",
+   "subject_category_min": 24,
+   "basic_understanding_min": 27,
+   "combined_min": 59,
+   "teaching_method_min": 4,
+   "teaching_method_courses": ["TE10", "TE11"],
+   "moral_education_required": false
+  }
+ },
+ "subject_matter": {
+  "note": "「教科に関する専門的事項」。 ●=必修科目。 math_jhs / math_hs で共通、info_hs は別リスト。",
+  "math": {
+   "min": 20,
+   "mandatory": ["FU03", "MA10", "MA05", "MA07", "LI01", "LI04"],
+   "electives": ["FU08", "IT10", "MA11", "MA06", "FU02", "PL04", "FU09", "FU06", "MA09"],
+   "groups": [
+    {"label": "代数学", "courses": [{"code": "FU03", "mandatory": true}, {"code": "FU08", "mandatory": false}]},
+    {"label": "幾何学", "courses": [{"code": "MA10", "mandatory": true}, {"code": "IT10", "mandatory": false}, {"code": "MA11", "mandatory": false}]},
+    {"label": "解析学", "courses": [{"code": "MA05", "mandatory": true}, {"code": "MA06", "mandatory": false}]},
+    {"label": "確率論、統計学", "courses": [{"code": "MA07", "mandatory": true}, {"code": "FU02", "mandatory": false}]},
+    {"label": "コンピュータ", "courses": [{"code": "LI01", "mandatory": true}, {"code": "LI04", "mandatory": true}, {"code": "PL04", "mandatory": false}, {"code": "FU09", "mandatory": false}, {"code": "FU06", "mandatory": false}, {"code": "MA09", "mandatory": false}]}
+   ]
+  },
+  "info": {
+   "min": 20,
+   "mandatory": ["LI03", "LI08", "LI07", "PL02", "LI11", "LI10", "FU04"],
+   "electives": ["FU01", "FU05", "SE07", "PL03", "FU14", "FU15", "SY05", "CN03", "IT08", "IT03", "IT02"],
+   "groups": [
+    {"label": "情報社会（職業に関する内容を含む。）・情報倫理", "courses": [{"code": "LI03", "mandatory": true}, {"code": "LI08", "mandatory": true}, {"code": "LI07", "mandatory": true}]},
+    {"label": "コンピュータ・情報処理", "courses": [{"code": "PL02", "mandatory": true}, {"code": "FU01", "mandatory": false}, {"code": "FU05", "mandatory": false}]},
+    {"label": "情報システム", "courses": [{"code": "SE07", "mandatory": false}, {"code": "FU04", "mandatory": true}, {"code": "PL03", "mandatory": false}, {"code": "FU14", "mandatory": false}, {"code": "FU15", "mandatory": false}, {"code": "SY05", "mandatory": false}]},
+    {"label": "情報通信ネットワーク", "courses": [{"code": "LI11", "mandatory": true}, {"code": "CN03", "mandatory": false}]},
+    {"label": "マルチメディア表現・マルチメディア技術", "courses": [{"code": "LI10", "mandatory": true}, {"code": "IT08", "mandatory": false}, {"code": "IT03", "mandatory": false}, {"code": "IT02", "mandatory": false}]}
+   ]
+  }
+ },
+ "basic_understanding": {
+  "note": "「教育の基礎的理解に関する科目等」。3免許共通の必修科目 + 中一種のみ道徳教育必修 + 教育実習はいずれか一方。",
+  "common_required": ["TE02", "TE01", "TE19", "TE03", "TE21", "TE04", "TE22", "TE13", "TE05", "TE23", "TE14", "TE15", "TE18", "TE20"],
+  "moral_education_course": "TE12",
+  "practicum_choice": ["TE16", "TE17"],
+  "practicum_note": "中学校一種は教育実習１（TE16）必修。高等学校一種は教育実習１・２のいずれか一方。",
+  "groups": [
+   {"label": "教育の基礎的理解に関する科目", "courses": ["TE02", "TE01", "TE19", "TE03", "TE21", "TE04"]},
+   {"label": "道徳、総合的な学習の時間等の指導法及び生徒指導、教育相談等に関する科目", "courses": ["TE12", "TE22", "TE13", "TE05", "TE23", "TE14", "TE15"]},
+   {"label": "教育実践に関する科目", "courses": ["TE16", "TE17", "TE18", "TE20"]}
+  ]
+ },
+ "other_courses": {
+  "note": "「その他の科目（教育職員免許法施行規則第66条の6に定める科目）」。3免許共通、10単位すべて必修。",
+  "min": 10,
+  "required": ["HS12", "SS01", "SS02", "EN01", "EN02", "LI01"]
+ }
+}

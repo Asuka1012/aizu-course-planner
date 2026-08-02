@@ -1,0 +1,72 @@
+{
+ "note": "2022年度以降入学者向け 履修規程別表第３（コンピュータ理工学科）に基づく卒業要件。教職課程科目は128単位に含めず別集計。",
+ "total_min": 128,
+ "categories": [
+  {
+   "key": "liberal",
+   "name_ja": "教養科目",
+   "name_en": "Liberal Arts",
+   "min": 10,
+   "subcategories": [
+    { "key": "humanities_social", "name_ja": "人文社会", "name_en": "Humanities & Social Science", "min": 8 },
+    { "key": "health_sports", "name_ja": "健康・スポーツ", "name_en": "Health & Sports Science", "min": 2 }
+   ]
+  },
+  {
+   "key": "foreign_language",
+   "name_ja": "外国語科目",
+   "name_en": "Foreign Language",
+   "min": 15,
+   "subcategories": []
+  },
+  {
+   "key": "specialized",
+   "name_ja": "専門教育科目",
+   "name_en": "Specialized Education",
+   "min": 95,
+   "subcategories": [
+    { "key": "math", "name_ja": "数学", "name_en": "Mathematics", "min": 10 },
+    { "key": "natural_science", "name_ja": "自然科学", "name_en": "Natural Science", "min": 4 },
+    { "key": "computer_basics", "name_ja": "コンピュータ基礎", "name_en": "Computer Fundamentals", "min": 16 },
+    { "key": "programming", "name_ja": "プログラミング", "name_en": "Programming", "min": 12 },
+    { "key": "computer_science_basics", "name_ja": "コンピュータ理工学基礎", "name_en": "Computer Science & Engineering Fundamentals", "min": 21 },
+    { "key": "practical", "name_ja": "実践科目", "name_en": "Practical Courses", "min": 3 },
+    { "key": "specialized_other", "name_ja": "専門科目（その他・内数）", "name_en": "Other Specialized Courses (counted within total)", "min": 0 }
+   ]
+  },
+  {
+   "key": "thesis",
+   "name_ja": "卒業論文",
+   "name_en": "Graduation Thesis",
+   "min": 8,
+   "subcategories": [],
+   "auto": true
+  }
+ ],
+ "teaching_license": {
+  "key": "teaching_license",
+  "name_ja": "教職に関する科目（別集計）",
+  "name_en": "Teaching License Courses (tracked separately)",
+  "note": "128単位の卒業要件には含めない"
+ },
+ "free_elective": {
+  "key": "free_elective",
+  "name_ja": "自由科目（課外プロジェクト等）",
+  "name_en": "Free Electives (extracurricular projects, etc.)",
+  "note": "卒業要件カテゴリの単位数には含めないが、修得単位として記録する"
+ },
+ "category_map": [
+  { "major": "教養科目", "minor": "人文・社会", "target": "humanities_social" },
+  { "major": "教養科目", "minor": "健康・スポーツ科学", "target": "health_sports" },
+  { "major": "外国語科目", "minor": "*", "target": "foreign_language" },
+  { "major": "専門教育科目・専門基礎科目", "minor": "数学関連科目", "target": "math" },
+  { "major": "専門教育科目・専門基礎科目", "minor": "自然科学関連科目", "target": "natural_science" },
+  { "major": "専門教育科目・専門基礎科目", "minor": "コンピュータ基礎関連科目", "target": "computer_basics" },
+  { "major": "専門教育科目・専門基礎科目", "minor": "プログラミング関連科目", "target": "programming" },
+  { "major": "専門教育科目・専門基礎科目", "minor": "コンピュータ理工学基礎関連科目", "target": "computer_science_basics" },
+  { "major": "専門教育科目・実践科目", "minor": "実践科目", "target": "practical" },
+  { "major": "専門教育科目・専門科目", "minor": "*", "target": "specialized_other" },
+  { "major": "教職に関する専門科目", "minor": "*", "target": "teaching_license" },
+  { "major": "課外プロジェクト", "minor": "*", "target": "free_elective" }
+ ]
+}

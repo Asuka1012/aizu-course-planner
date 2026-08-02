@@ -1,0 +1,1959 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>会津大学 履修プランナー / Aizu University Course Planner</title>
+<style>
+:root{
+  /* 卒業要件案内板 v2 - 紺×ゴールドの2色体系（ライトモードのみ）。
+     状態の違いは色を増やさず、塗り/アウトライン/点線/左アクセント線などの
+     "形"で表現する。--danger は装飾色ではなく、単位数超過という機能的な
+     警告にのみ使う例外。 */
+  --bg:#f7f5f0; --panel:#ffffff; --border:#e0dccf; --text:#2a2a28; --text-dim:#8a8676;
+  --accent:#1b2a4a; --accent-dim:#e9edf4; --accent-text:#ffffff;
+  --gold:#c9a24a; --gold-text:#8a6a1f; --gold-on-navy:#e4c878; --gold-dim:#f7efdc;
+  --danger:#ad3f38; --danger-dim:#f7e8e6;
+  --radius:4px; --shadow:0 1px 3px rgba(27,42,74,.1);
+  --header-bg:#1b2a4a; --header-text:#f7f5f0;
+  /* タイムラインの学年別カラム - 色相を増やさず、紺の濃淡だけで学年を分ける */
+  --y1:#f7f5f0; --y2:#efeeea; --y3:#e9edf4; --y4:#dde3ee;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:-apple-system,"Hiragino Sans","Yu Gothic",Segoe UI,Roboto,sans-serif;
+  font-size:14px; line-height:1.5; min-height:100vh;
+}
+button, select, input{font-family:inherit; font-size:inherit; color:inherit;}
+a{color:var(--accent);}
+h1,h2,h3,h4{margin:0 0 .5em 0; font-weight:700;}
+.hidden{display:none !important;}
+.app-header{
+  position:sticky; top:0; z-index:50; background:var(--header-bg); color:var(--header-text);
+  border-bottom:3px solid; border-image:linear-gradient(90deg,#c9a24a,#e4c878,#c9a24a) 1;
+  padding:.6rem 1rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+}
+.app-title{font-size:1.05rem; font-weight:800; margin:0; white-space:nowrap; letter-spacing:.01em;}
+.app-title small{display:block; font-weight:400; font-size:.68rem; letter-spacing:.06em; color:#aab4cc;}
+.tabs{display:flex; gap:.15rem; flex-wrap:wrap; flex:1;}
+.tab-btn{
+  border:1px solid transparent; border-bottom:2px solid transparent; background:transparent; padding:.5rem .8rem;
+  border-radius:2px; cursor:pointer; font-weight:700; color:#c3cadd; font-size:.86rem; letter-spacing:.02em;
+}
+.tab-btn:hover{background:rgba(255,255,255,.08); color:#fff;}
+.tab-btn.active{background:rgba(201,162,74,.18); color:#fff; border-bottom-color:var(--gold);}
+.header-actions{display:flex; gap:.4rem; flex-wrap:wrap;}
+.btn{
+  border:1px solid var(--border); background:var(--panel); padding:.45rem .75rem; border-radius:var(--radius);
+  cursor:pointer; font-weight:700; color:var(--text);
+}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-text);}
+.btn.danger{color:var(--danger); border-color:var(--danger);}
+.btn.small{padding:.25rem .5rem; font-size:.78rem; border-radius:3px;}
+.header-actions .btn{background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.18); color:var(--header-text);}
+.header-actions .btn:hover{border-color:var(--gold);}
+.header-actions .btn.danger{color:#f0a89f; border-color:#8a453f;}
+main{max-width:1200px; margin:0 auto; padding:1rem;}
+.view{display:none;}
+.view.active{display:block;}
+.panel{
+  background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem; margin-bottom:1rem; box-shadow:var(--shadow);
+}
+.panel > h2{
+  position:relative; padding-bottom:.7rem; margin-bottom:1rem; color:var(--accent);
+  letter-spacing:.01em;
+}
+.panel > h2::after{content:""; position:absolute; left:0; bottom:0; width:30px; height:2px; background:var(--gold);}
+.grid-2{display:grid; grid-template-columns:1fr 1fr; gap:1rem;}
+.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem;}
+@media (max-width:760px){ .grid-2,.grid-3{grid-template-columns:1fr;} }
+label.field-label{display:block; font-weight:700; margin-bottom:.3rem;}
+.hint{color:var(--text-dim); font-size:.8rem; margin-top:.2rem;}
+select,input[type=text]{
+  width:100%; padding:.5rem .6rem; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text);
+}
+.export-textarea{
+  width:100%; box-sizing:border-box; padding:.5rem .6rem; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.72rem; line-height:1.4; resize:vertical;
+}
+.chip-select{display:flex; flex-wrap:wrap; gap:.4rem;}
+.chip-select label{
+  border:1px solid var(--border); border-radius:20px; padding:.35rem .8rem; cursor:pointer; user-select:none;
+  background:var(--bg);
+}
+.chip-select input{display:none;}
+.chip-select input:checked + span{color:var(--accent); font-weight:700;}
+.chip-select label:has(input:checked){border-color:var(--accent); background:var(--accent-dim);}
+.radio-row{display:flex; gap:1rem;}
+.radio-row label{display:flex; align-items:center; gap:.3rem; cursor:pointer;}
+
+.banner{
+  border-radius:var(--radius); padding:.7rem 1rem; margin-bottom:.7rem; display:flex; gap:.7rem; align-items:flex-start;
+  border:1px solid; flex-wrap:wrap;
+}
+.banner.field{background:var(--gold-dim); border-color:var(--gold); color:var(--text);}
+.banner.warn{background:var(--danger-dim); border-color:var(--danger); color:var(--text);}
+.banner .banner-body{flex:1; min-width:220px;}
+.banner .banner-title{font-weight:800; margin-bottom:.2rem;}
+.badge{display:inline-block; font-size:.7rem; font-weight:800; border-radius:3px; padding:.1rem .45rem; margin-left:.3rem; white-space:nowrap; letter-spacing:.02em;}
+.badge.basic{color:var(--accent); background:var(--gold);}
+.badge.field{color:var(--gold-text); background:transparent; border:1px solid var(--gold);}
+.badge.te{color:var(--text-dim); background:transparent; border:1px solid var(--border);}
+
+.search-row{display:flex; gap:.6rem; margin-bottom:.6rem; flex-wrap:wrap;}
+.search-row input[type=text]{flex:2; min-width:220px;}
+.filters{display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-start; margin-bottom:.8rem;}
+.filter-group{background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.5rem .7rem;}
+.filter-group .fg-title{font-size:.72rem; font-weight:800; color:var(--text-dim); margin-bottom:.3rem; text-transform:uppercase;}
+.filter-group label{display:inline-flex; align-items:center; gap:.25rem; margin-right:.6rem; font-size:.82rem; cursor:pointer;}
+
+.course-list{display:flex; flex-direction:column; gap:.5rem; max-height:none;}
+.course-card{border:1px solid var(--border); border-radius:8px; padding:.6rem .8rem; background:var(--bg);}
+.cc-detail{font-size:.85rem;}
+.cc-detail p{margin:.3rem 0;}
+.offer-row{display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; padding:.3rem 0; border-bottom:1px solid var(--border);}
+.offer-row:last-child{border-bottom:none;}
+
+.tt-toolbar{display:flex; gap:.6rem; align-items:center; margin-bottom:.8rem; flex-wrap:wrap;}
+.tt-grid{display:grid; grid-template-columns:52px repeat(5,1fr); gap:2px; background:var(--border); border:1px solid var(--border); border-radius:8px; overflow:hidden;}
+.tt-grid .tt-cell{background:var(--panel); padding:.3rem; min-height:52px; font-size:.72rem;}
+.tt-grid .tt-head{background:var(--bg); font-weight:800; text-align:center; padding:.4rem; font-size:.78rem;}
+.tt-grid .tt-period{background:var(--bg); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--text-dim);}
+.tt-course{border-radius:2px; padding:.2rem .35rem .2rem .45rem; margin-bottom:.2rem; background:var(--accent); color:var(--gold-on-navy); border:1px solid var(--accent); font-weight:700; line-height:1.25;}
+.tt-course.basic{border-left:4px solid var(--gold);}
+.tt-course.field{border-left:2px solid var(--gold);}
+.tt-course.conflict{outline:2px solid var(--danger);}
+.tt-course.tentative{background:transparent; color:var(--text);}
+.tt-course.tentative .room{color:var(--text-dim);}
+.tt-course .room{font-weight:400; color:var(--gold-on-navy); opacity:.85; font-size:.68rem; display:block;}
+
+.plan-grid{display:grid; grid-template-columns:64px repeat(4,1fr) 90px; gap:2px; background:var(--border); border:1px solid var(--border); border-radius:8px; overflow:hidden;}
+.plan-grid .pg-head{background:var(--bg); font-weight:800; text-align:center; padding:.5rem; font-size:.8rem;}
+.plan-grid .pg-year{background:var(--bg); display:flex; align-items:center; justify-content:center; font-weight:800;}
+.plan-grid .pg-cell{background:var(--panel); padding:.35rem; min-height:70px; vertical-align:top;}
+.plan-grid .pg-total{background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800;}
+.plan-grid .pg-total.over{color:var(--danger);}
+.plan-chip{
+  display:flex; align-items:center; justify-content:space-between; gap:.3rem; background:var(--accent); color:var(--gold-on-navy);
+  border:1px solid var(--accent); border-radius:2px; padding:.15rem .5rem; margin-bottom:.2rem; font-size:.74rem;
+}
+.plan-chip.basic{border-left:4px solid var(--gold);}
+.plan-chip.field{border-left:2px solid var(--gold);}
+.plan-chip.tentative{background:transparent; color:var(--text);}
+.plan-chip .x{cursor:pointer; color:inherit; font-weight:800; opacity:.7;}
+.plan-chip .x:hover{opacity:1;}
+.status-toggle{cursor:pointer; font-size:.66rem; padding:.05rem .35rem; border-radius:3px; font-weight:700; white-space:nowrap; border:1px solid currentColor; opacity:.85;}
+.status-toggle:hover{opacity:1;}
+
+.dash-cat{margin-bottom:1rem;}
+.dash-row{display:flex; align-items:center; gap:.6rem; margin-bottom:.5rem;}
+.dash-label{width:230px; flex-shrink:0; font-weight:700; font-size:.85rem;}
+.dash-label small{display:block; font-weight:400; color:var(--text-dim);}
+.dash-bar-track{flex:1; height:14px; background:var(--bg); border:1px solid var(--border); border-radius:7px; overflow:hidden;}
+.dash-bar-fill{height:100%; background:var(--accent);}
+.dash-bar-fill.met{background:var(--gold);}
+.dash-num{width:110px; text-align:right; font-weight:700; font-size:.82rem; flex-shrink:0;}
+.dash-sub{margin-left:1.5rem;}
+
+/* ======================= timeline planner ======================= */
+.tl-legend{display:flex; flex-wrap:wrap; gap:1rem; font-size:.78rem; color:var(--text-dim); margin-bottom:.7rem; align-items:center;}
+.tl-legend span{display:inline-flex; align-items:center; gap:.35rem;}
+.tl-swatch{width:14px; height:14px; border-radius:2px; display:inline-block; background:var(--bg); border:2px solid var(--border); border-left-width:4px;}
+.tl-swatch.basic{border-left-color:var(--gold);}
+.tl-swatch.field{border-left-color:var(--gold); border-left-width:2px;}
+.tl-swatch.selected{background:var(--accent); border-color:var(--accent);}
+.tl-swatch.avail{border-color:var(--text-dim);}
+.tl-swatch.prereq{border-color:#c026d3; box-shadow:0 0 0 2px #c026d3 inset;}
+.tl-swatch.license{box-shadow:inset 3px 0 0 #7c3aed;}
+.tl-wrap{overflow:auto; max-height:72vh; border:1px solid var(--border); border-radius:8px;}
+.tl-grid{display:grid; grid-template-columns:170px repeat(8, minmax(150px,1fr)); min-width:1400px;}
+.tl-head{position:sticky; top:0; z-index:5; padding:.5rem .4rem; text-align:center; font-weight:800; font-size:.78rem; border-bottom:2px solid var(--border); border-left:1px solid var(--border);}
+.tl-head.corner{background:var(--panel); border-left:none; position:sticky; left:0; z-index:6;}
+.tl-head .cap{display:block; font-weight:700; font-size:.72rem; margin-top:.15rem;}
+.tl-head .cap.over{color:var(--danger);}
+.tl-y1{background:var(--y1);} .tl-y2{background:var(--y2);} .tl-y3{background:var(--y3);} .tl-y4{background:var(--y4);}
+.tl-group-header{
+  grid-column:1 / -1; background:var(--header-bg); color:#fff; font-weight:800; padding:.4rem .7rem;
+  cursor:pointer; display:flex; align-items:center; gap:.5rem; font-size:.82rem; user-select:none;
+  letter-spacing:.03em; border-left:4px solid var(--gold);
+}
+.tl-group-header .arrow{transition:transform .15s;}
+.tl-group-header.collapsed .arrow{transform:rotate(-90deg);}
+.tl-row-label{
+  position:sticky; left:0; z-index:4; background:var(--panel); border-left:1px solid var(--border); border-bottom:1px solid var(--border);
+}
+.tl-row-label>span{
+  position:sticky; top:var(--tl-header-h, 56px); display:block; padding:.5rem; font-weight:700; font-size:.78rem;
+}
+.tl-cell{
+  border-left:1px solid var(--border); border-bottom:1px solid var(--border); padding:.3rem; display:flex; flex-wrap:wrap;
+  align-content:flex-start; gap:.25rem; min-height:44px;
+}
+.tl-chip{
+  border-radius:2px; padding:.2rem .45rem .2rem .5rem; font-size:.72rem; font-weight:700; cursor:pointer; line-height:1.3;
+  border:1px solid var(--border); border-left:4px solid var(--border); background:var(--panel); max-width:100%;
+}
+.tl-chip.avail{background:transparent; border-color:var(--text-dim); color:var(--text-dim); font-weight:600;}
+.tl-chip.avail:hover{border-color:var(--accent); color:var(--text);}
+.tl-chip.avail.basic{border-left-color:var(--gold); border-left-style:solid; color:var(--gold-text);}
+.tl-chip.avail.field{border-left-color:var(--gold); border-left-width:2px; color:var(--gold-text);}
+.tl-chip.selected{background:var(--accent); border-color:var(--accent); color:var(--gold-on-navy);}
+.tl-chip.selected.basic{border-left-color:var(--gold);}
+.tl-chip.selected.field{border-left:2px solid var(--gold);}
+.tl-chip.auto{background:var(--bg); border-color:var(--border); color:var(--text-dim); cursor:default;}
+.tl-chip.prereq-highlight{outline:3px solid #c026d3; outline-offset:1px;}
+.tl-chip.license-required{box-shadow:inset 3px 0 0 #7c3aed;}
+.tl-chip.selected.tentative{background:transparent; color:var(--text);}
+.tl-fixed-row{grid-column:2 / -1; padding:.6rem; font-size:.82rem; color:var(--text-dim); border-bottom:1px solid var(--border);}
+
+footer.app-footer{text-align:center; color:var(--text-dim); font-size:.75rem; padding:2rem 1rem;}
+.modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:100; padding:1rem;}
+.modal{background:var(--panel); border-radius:var(--radius); padding:1.2rem; max-width:640px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:var(--shadow);}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1 class="app-title">会津大学 履修プランナー<small>Aizu University Course Planner &middot; AY2026</small></h1>
+  <nav class="tabs" id="tabs">
+    <button class="tab-btn" data-view="setup">初期設定</button>
+    <button class="tab-btn" data-view="search">科目を探す</button>
+    <button class="tab-btn" data-view="timetable">週間時間割</button>
+    <button class="tab-btn" data-view="plan">履修計画</button>
+    <button class="tab-btn" data-view="dashboard">卒業要件</button>
+    <button class="tab-btn" data-view="teaching">教職課程</button>
+  </nav>
+  <div class="header-actions">
+    <button class="btn small" id="btn-export-json">JSON書出</button>
+    <button class="btn small" id="btn-export-csv">CSV書出</button>
+    <button class="btn small" id="btn-import">読込</button>
+    <input type="file" id="file-import" accept="application/json" class="hidden">
+    <button class="btn small danger" id="btn-reset">リセット</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ===================== SETUP VIEW ===================== -->
+<section class="view" id="view-setup">
+  <div class="panel">
+    <h2>初期設定 / Initial Setup</h2>
+    <p class="hint">Cクラス・Eクラス・フィールド・教職課程の有無を設定してください。1年 第1・第2学期は大学側が直接割り当てるため、基本推奨科目は自動的に履修済みとしてカウントされます（時間割表示や登録操作は不要です）。それ以降の学期の基本推奨科目は、「科目を探す」から履修計画に追加した時点で単位数がカウントされます。<br>
+    Set your C-class, E-class, field(s) and teaching-license status. Year1 Q1/Q2 is assigned directly by the university, so basic-recommended courses there are auto-completed. From then on, basic-recommended courses only count once you add them to your plan via Course Search.</p>
+    <div class="grid-2">
+      <div>
+        <label class="field-label">Cクラス / C-Class（必須）</label>
+        <select id="input-cclass">
+          <option value="">選択してください</option>
+          <option>C1</option><option>C2</option><option>C3</option>
+          <option>C4</option><option>C5</option><option>C6</option>
+        </select>
+        <div class="hint">週間時間割・履修計画に使う基本クラス区分です。</div>
+      </div>
+      <div>
+        <label class="field-label">Eクラス / E-Class（任意・自由入力）</label>
+        <input type="text" id="input-eclass" placeholder="例: 3E5">
+        <div class="hint">語学系科目の少人数クラスラベル。複合ラベル（例: 1E2-2E2）に対応するため自由入力です。</div>
+      </div>
+    </div>
+    <div style="margin-top:1rem;">
+      <label class="field-label">フィールド / Field（任意・複数選択可、卒業要件には影響しません）</label>
+      <div class="chip-select" id="field-chips">
+        <label><input type="checkbox" value="CS"><span>CS</span></label>
+        <label><input type="checkbox" value="SY"><span>SY</span></label>
+        <label><input type="checkbox" value="CN"><span>CN</span></label>
+        <label><input type="checkbox" value="IT-SPR"><span>IT-SPR</span></label>
+        <label><input type="checkbox" value="IT-CMV"><span>IT-CMV</span></label>
+        <label><input type="checkbox" value="SE-DE"><span>SE-DE</span></label>
+      </div>
+    </div>
+    <div style="margin-top:1rem;">
+      <label class="field-label">教職課程 / Teaching License Track（任意・複数選択可）</label>
+      <div class="chip-select" id="license-chips">
+        <label><input type="checkbox" value="math_jhs"><span>中学校数学</span></label>
+        <label><input type="checkbox" value="math_hs"><span>高校数学</span></label>
+        <label><input type="checkbox" value="info_hs"><span>高校情報</span></label>
+      </div>
+      <div class="hint">教職に関する科目の単位は卒業必要単位（128単位）には含めず、別集計で表示します。取得を目指す免許状を選ぶと、卒業要件ダッシュボードに免許ごとの必要単位の進捗が表示され、その免許の必修科目（●・○印の科目）は自動的に履修計画へ登録されます。</div>
+    </div>
+    <div style="margin-top:1.2rem;">
+      <button class="btn primary" id="btn-save-setup">設定を保存して開始 / Save &amp; Start</button>
+      <span class="hint" id="setup-status" style="margin-left:.6rem;"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SEARCH / TIMELINE PLANNER VIEW ===================== -->
+<section class="view" id="view-search">
+  <div class="panel">
+    <h2>履修計画表 / Course Plan Timeline</h2>
+    <div id="search-banners"></div>
+    <div class="search-row" style="align-items:center;">
+      <input type="text" id="search-input" placeholder="科目コード・科目名（日本語/English）で検索するとハイライトされます / Search highlights matching courses">
+      <label style="display:flex; align-items:center; gap:.35rem; white-space:nowrap;">
+        <input type="checkbox" id="f-show-te">教職課程科目を表示
+      </label>
+    </div>
+    <div class="tl-legend">
+      <span><span class="tl-swatch basic"></span>基本推奨</span>
+      <span><span class="tl-swatch field"></span>フィールド推奨</span>
+      <span><span class="tl-swatch selected"></span>選択済み（クリックで詳細）</span>
+      <span><span class="tl-swatch avail"></span>選択可能（クリックで登録）</span>
+      <span><span class="tl-swatch prereq"></span>クリックした科目の先修科目</span>
+      <span><span class="tl-swatch license"></span>選択中の教員免許状の必要科目</span>
+    </div>
+    <div class="tl-wrap">
+      <div class="tl-grid" id="tl-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TIMETABLE VIEW ===================== -->
+<section class="view" id="view-timetable">
+  <div class="panel">
+    <h2>週間時間割 / Weekly Timetable</h2>
+    <div class="tt-toolbar">
+      <label>学年 <select id="tt-year"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+      <label>学期 <select id="tt-quarter"><option value="1">Q1</option><option value="2">Q2</option><option value="3">Q3</option><option value="4">Q4</option></select></label>
+      <span class="hint" id="tt-context"></span>
+    </div>
+    <div id="tt-banners"></div>
+    <div id="tt-auto-info" class="hidden"></div>
+    <div class="tt-grid" id="tt-grid"></div>
+    <div id="tt-unscheduled" class="hint" style="margin-top:.8rem;"></div>
+  </div>
+</section>
+
+<!-- ===================== PLAN GRID VIEW ===================== -->
+<section class="view" id="view-plan">
+  <div class="panel">
+    <h2>履修計画 / 4-Year Plan Grid</h2>
+    <p class="hint" id="cap-label">履修登録単位数の上限（半期28単位・1年間56単位）を超えると警告表示します。</p>
+    <div class="plan-grid" id="plan-grid"></div>
+    <div style="margin-top:.8rem; font-weight:700;">
+      合計 / Total: <span id="plan-total">0</span> 単位
+      <span class="hint">（卒業要件 128単位のうち）</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DASHBOARD VIEW ===================== -->
+<section class="view" id="view-dashboard">
+  <div class="panel">
+    <h2>卒業要件ダッシュボード / Graduation Requirements</h2>
+    <div id="dashboard-body"></div>
+  </div>
+</section>
+
+<!-- ===================== TEACHING LICENSE VIEW ===================== -->
+<section class="view" id="view-teaching">
+  <div class="panel">
+    <h2>教職課程 / Teaching License Course Checklist</h2>
+    <p class="hint">会津大学2025年度キャンパスガイド43-44ページの科目一覧を、選択中の免許ごとに表示します。●・○・◎・▲は必修科目です。</p>
+    <div id="teaching-body"></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="app-footer">2026年度カリキュラム情報に基づく非公式の履修プランニングツールです。最新情報は必ず大学公式のシラバス・履修要覧でご確認ください。</footer>
+
+<div id="modal-root"></div>
+
+<script>
+"use strict";
+/* ======================= injected data ======================= */
+const COURSES = __COURSES_JSON__;
+const TIMETABLE = __TIMETABLE_JSON__;
+const GRADREQ = __GRADREQ_JSON__;
+const TEACHING = __TEACHING_JSON__;
+
+/* ======================= constants ======================= */
+const DAYS = ["月","火","水","木","金"];
+const DAY_EN = {"月":"Mon","火":"Tue","水":"Wed","木":"Thu","金":"Fri"};
+const PERIODS = Array.from({length:11}, (_,i)=>i+1);
+const FIELD_LABELS = ["CS","SY","CN","IT-SPR","IT-CMV","SE-DE"];
+const CAP_PER_SEMESTER = 28; // 半期(前期/後期)あたりの登録単位数上限
+const CAP_PER_YEAR = 56;     // 1年間の登録単位数上限
+const PROMOTION_MIN_BASIC_CREDITS = 55; // 進級条件: 基本推奨科目からの履修単位の下限
+const STORAGE_KEY = "aizuPlannerState.v1";
+
+/* ======================= state ======================= */
+function defaultState(){
+  return {
+    setup: { cClass:"", eClass:"", fields:[], teacherLicenses:[], done:false },
+    selections: [] // {id, courseId, year, quarter} - courses the student actively chose
+  };
+}
+let STATE = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    const state = Object.assign(defaultState(), parsed);
+    // Plans saved before the confirmed/tentative status feature existed have
+    // selections with no status field - treat those as confirmed.
+    (state.selections||[]).forEach(s=>{ if(s.status!=="confirmed" && s.status!=="tentative") s.status = "confirmed"; });
+    return state;
+  }catch(e){ console.warn("state load failed", e); return defaultState(); }
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
+}
+
+/* ======================= indices ======================= */
+const coursesById = new Map(COURSES.map(c=>[c.id,c]));
+const coursesByCode = new Map();
+COURSES.forEach(c=>{ if(!coursesByCode.has(c.code)) coursesByCode.set(c.code, c); });
+
+const timetableByCourseId = new Map();
+TIMETABLE.forEach(e=>{
+  if(!e.course_id) return;
+  if(!timetableByCourseId.has(e.course_id)) timetableByCourseId.set(e.course_id, []);
+  timetableByCourseId.get(e.course_id).push(e);
+});
+const timetableByYQ = new Map();
+TIMETABLE.forEach(e=>{
+  const key = e.year+"-"+e.quarter;
+  if(!timetableByYQ.has(key)) timetableByYQ.set(key, []);
+  timetableByYQ.get(key).push(e);
+});
+
+const categoryMap = GRADREQ.category_map;
+function mapCategoryToReq(major, minor){
+  for(const m of categoryMap){
+    if(m.major===major && (m.minor==="*" || m.minor===minor)) return m.target;
+  }
+  return null;
+}
+const reqLookup = new Map(); // key -> {name_ja,name_en,min,parentKey}
+GRADREQ.categories.forEach(cat=>{
+  reqLookup.set(cat.key, {name_ja:cat.name_ja, name_en:cat.name_en, min:cat.min, parent:null});
+  (cat.subcategories||[]).forEach(sub=>{
+    reqLookup.set(sub.key, {name_ja:sub.name_ja, name_en:sub.name_en, min:sub.min, parent:cat.key});
+  });
+});
+
+/* ======================= matching helpers ======================= */
+function columnParts(column){
+  // "2-C1/C2" -> {year:2, labels:["C1","C2"]}  |  "3-CS/IT-SPR" -> {year:3, labels:["CS","IT-SPR"]}
+  const m = column.match(/^(\d)-(.+)$/);
+  if(!m) return {year:null, labels:[]};
+  return {year:parseInt(m[1],10), labels:m[2].split("/")};
+}
+function studentMatchesColumn(column, setup){
+  const {labels} = columnParts(column);
+  if(labels.some(l=>l===setup.cClass)) return true;
+  if(setup.fields && setup.fields.length && labels.some(l=>setup.fields.includes(l))) return true;
+  return false;
+}
+function eclassMatches(label, eClass){
+  if(!eClass) return false;
+  return label.split("-").includes(eClass);
+}
+function entryMatchesStudent(e, setup){
+  const {labels} = columnParts(e.column);
+  const isFieldColumn = labels.length>0 && labels.every(l=>!/^C[1-6]$/.test(l));
+  if(isFieldColumn && !e.field_tag){
+    // Year3/4 columns are laid out per field-pair, but some courses (e.g. TE
+    // pedagogy courses) are identical across every field column - they have no
+    // field_tag because they aren't actually field-specific, so they should
+    // match any student in that year regardless of whether a field is chosen.
+  } else if(!studentMatchesColumn(e.column, setup)){
+    return false;
+  }
+  if(e.field_tag && setup.fields && setup.fields.length && !setup.fields.includes(e.field_tag)) return false;
+  if(e.class_assignments && e.class_assignments.length){
+    return e.class_assignments.some(a=>{
+      if(/^C[1-6]$/.test(a.label)){
+        // The C1-C6 class split only exists in Year1-2; a handful of Year3-4
+        // courses happen to reuse "C1"/"C2"-shaped labels for unrelated small
+        // groups (e.g. EN08 in 4年), which have nothing to do with the
+        // student's original C-class, so don't filter on it there.
+        if(e.year>=3) return true;
+        return a.label===setup.cClass;
+      }
+      return eclassMatches(a.label, setup.eClass);
+    });
+  }
+  return true;
+}
+function offeringsForCourse(courseId){
+  return timetableByCourseId.get(courseId) || [];
+}
+function matchedOfferingsForStudent(courseId, setup){
+  return offeringsForCourse(courseId).filter(e=>entryMatchesStudent(e, setup));
+}
+const DAY_ORDER = ["月","火","水","木","金","土","日"];
+/* A course offered "Mon1,Mon2 / Wed3,Wed4" meets at ALL of those slots every
+   week - registering means attending everything in the group, not picking one.
+   Group matched entries by (year,quarter,column) into a single registration
+   with a combined schedule string, so there is exactly one action per real
+   offering instead of one row per day/period. */
+function semesterPairFor(course){
+  const q = course ? course.quarter : [];
+  return (q.length===2 && q[0]+1===q[1] && (q[0]===1 || q[0]===3)) ? q : null;
+}
+function quarterLabel(quarters){
+  if(quarters.length===1) return "第"+quarters[0]+"学期";
+  if(quarters.length===2 && quarters[0]===1 && quarters[1]===2) return "前期(Q1・Q2通し)";
+  if(quarters.length===2 && quarters[0]===3 && quarters[1]===4) return "後期(Q3・Q4通し)";
+  if(quarters.length===4) return "通年(Q1〜Q4)";
+  return quarters.map(q=>"Q"+q).join("・");
+}
+/* A course whose official 開講学期 is "前期"(Q1+Q2) or "後期"(Q3+Q4) is one
+   continuous half-year registration, not two independent quarters to choose
+   between - so those two quarters are merged into a single group here, and
+   registering adds both quarter placements at once. */
+// 課外プロジェクト (OT03-xxx) courses have no per-course timetable entry - the raw
+// schedule just marks 木9,10 (also seen at 月9,10 / 水9,10 in some quarters, but
+// 木9,10 is the one slot present in every single quarter across all 4 years, and
+// is confirmed as the actual slot to use) as a generic free period. Treat it as
+// the fixed slot for any 課外プロジェクト course instead of leaving it unscheduled.
+const EXTRACURRICULAR_DAY = "木";
+const EXTRACURRICULAR_PERIODS = [9, 10];
+function groupOfferingsForRegistration(courseId, setup){
+  const course = coursesById.get(courseId);
+  const semesterPair = semesterPairFor(course);
+  const matched = matchedOfferingsForStudent(courseId, setup);
+
+  if(matched.length){
+    const groups = new Map();
+    matched.forEach(o=>{
+      const quarters = semesterPair || [o.quarter];
+      // Field-independent entries (no field_tag) are identical across every
+      // field-pair column in Year3/4 (same day/period/room) - merge them into
+      // one registration instead of one per column, since it's the same class.
+      const groupCol = o.field_tag ? o.column : "";
+      const key = o.year+"|"+quarters.join(",")+"|"+groupCol;
+      if(!groups.has(key)) groups.set(key, {year:o.year, quarters, column:groupCol, entries:[]});
+      groups.get(key).entries.push(o);
+    });
+    return Array.from(groups.values()).map(g=>{
+      const byDay = new Map();
+      g.entries.forEach(e=>{
+        if(!byDay.has(e.day)) byDay.set(e.day, []);
+        byDay.get(e.day).push(e.period);
+      });
+      const scheduleStr = DAY_ORDER.filter(d=>byDay.has(d)).map(d=>{
+        const periods = Array.from(new Set(byDay.get(d))).sort((a,b)=>a-b);
+        return d+periods.join(",");
+      }).join(" ");
+      const rooms = Array.from(new Set(g.entries.map(e=>e.room).filter(Boolean)));
+      return {year:g.year, quarters:g.quarters, column:g.column, scheduleStr, rooms};
+    }).sort((a,b)=> a.year-b.year || a.quarters[0]-b.quarters[0]);
+  }
+
+  // No real timetable match. 課外プロジェクト courses always meet 木9,10 - synthesize
+  // one registration per eligible year (still asks which year, since that's a real choice).
+  if(course && course.category.major==="課外プロジェクト"){
+    return course.target_year.map(y=>{
+      const year = parseInt(y, 10);
+      const quarters = semesterPair || (course.quarter.length ? course.quarter : [1,2,3,4]);
+      return {year, quarters, column:"", scheduleStr:EXTRACURRICULAR_DAY+EXTRACURRICULAR_PERIODS.join(","), rooms:[]};
+    });
+  }
+  // Otherwise, if the course only has one possible (year, quarter) combination at
+  // all (per its own syllabus record), there's no real choice to make even though
+  // no timetable row exists for it - treat that single combination as the one group
+  // instead of forcing the student through the "no data, pick manually" fallback.
+  if(course && course.target_year.length===1 && course.quarter.length===1){
+    return [{year: parseInt(course.target_year[0], 10), quarters:[course.quarter[0]], column:"", scheduleStr:"", rooms:[]}];
+  }
+  return [];
+}
+
+/* ======================= selections helpers ======================= */
+function selectedCourseIds(){
+  return new Set(STATE.selections.map(s=>s.courseId));
+}
+function isCourseSelected(courseId){
+  return STATE.selections.some(s=>s.courseId===courseId);
+}
+function placementsFor(year, quarter){
+  return STATE.selections.filter(s=>s.year===year && s.quarter===quarter);
+}
+function addSelection(courseId, year, quarter, status){
+  const exists = STATE.selections.some(s=>s.courseId===courseId && s.year===year && s.quarter===quarter);
+  if(exists) return;
+  STATE.selections.push({id:"sel_"+Math.random().toString(36).slice(2,10), courseId, year, quarter, status: status||"tentative"});
+  saveState();
+}
+function removeSelection(selId){
+  STATE.selections = STATE.selections.filter(s=>s.id!==selId);
+  saveState();
+}
+function removeAllPlacementsForCourse(courseId){
+  STATE.selections = STATE.selections.filter(s=>s.courseId!==courseId);
+  saveState();
+}
+// A 前期/後期 (semester-long) registration spans two quarters at once - add or
+// remove all of them together so the student can't end up registered for
+// just half of a continuous course.
+function addRegistrationGroup(courseId, year, quarters, status){
+  quarters.forEach(q=>addSelection(courseId, year, q, status));
+}
+function removeRegistrationGroup(courseId, year, quarters){
+  STATE.selections = STATE.selections.filter(s=>
+    !(s.courseId===courseId && s.year===year && quarters.includes(s.quarter)));
+  saveState();
+}
+// Flip a whole registration (all quarters of a 前期/後期 pair together) between
+// "confirmed" (履修確定) and "tentative" (検討中). If the quarters somehow ended
+// up with mixed statuses, treat it as confirmed-unless-all-confirmed so one
+// click always yields a consistent, predictable result across the group.
+function toggleRegistrationStatus(courseId, year, quarters){
+  const matches = STATE.selections.filter(s=>s.courseId===courseId && s.year===year && quarters.includes(s.quarter));
+  if(!matches.length) return;
+  const newStatus = matches.every(s=>s.status==="confirmed") ? "tentative" : "confirmed";
+  matches.forEach(s=>{ s.status = newStatus; });
+  saveState();
+}
+// Aggregate status across all of a course's registrations, for views (timeline,
+// timetable) that show one chip/box per course rather than per registration -
+// any tentative quarter marks the whole course tentative there.
+function courseRegistrationStatus(courseId){
+  const sels = STATE.selections.filter(s=>s.courseId===courseId);
+  if(!sels.length) return null;
+  return sels.some(s=>s.status==="tentative") ? "tentative" : "confirmed";
+}
+// Collapse a course's raw per-quarter selections back into whole registrations
+// (merging both quarters of a 前期/後期 pair into one entry) for display.
+function selectedRegistrationsForCourse(courseId){
+  const course = coursesById.get(courseId);
+  const semesterPair = semesterPairFor(course);
+  const byYear = new Map();
+  STATE.selections.filter(s=>s.courseId===courseId).forEach(s=>{
+    if(!byYear.has(s.year)) byYear.set(s.year, new Map());
+    byYear.get(s.year).set(s.quarter, s.status);
+  });
+  const result = [];
+  byYear.forEach((quarterStatus, year)=>{
+    const quartersSet = new Set(quarterStatus.keys());
+    const groupStatus = quarters=>quarters.some(qq=>quarterStatus.get(qq)==="tentative") ? "tentative" : "confirmed";
+    if(semesterPair && semesterPair.every(qq=>quartersSet.has(qq))){
+      result.push({year, quarters:semesterPair, status:groupStatus(semesterPair)});
+    } else {
+      quartersSet.forEach(qq=>result.push({year, quarters:[qq], status:groupStatus([qq])}));
+    }
+  });
+  return result.sort((a,b)=> a.year-b.year || a.quarters[0]-b.quarters[0]);
+}
+/* One-click register from the collapsed card: if there is exactly one real
+   offering for the student, add it directly - no need to open details first.
+   If it's ambiguous (multiple matching offerings) or there's no timetable
+   match at all, fall back to expanding the detail panel so the student can pick. */
+function quickAddCourse(courseId){
+  const groups = groupOfferingsForRegistration(courseId, STATE.setup);
+  if(groups.length===1){
+    addRegistrationGroup(courseId, groups[0].year, groups[0].quarters);
+    render();
+  } else {
+    openCourseModal(courseId);
+  }
+}
+
+/* ======================= basic-recommended courses =======================
+   [SR]/赤字 "basic recommended" courses are the standard curriculum assigned to a
+   C-class. From Year1 Q3 onward (and in Year2-4), registering a basic-recommended
+   course is still something the student actively does, so it only counts once
+   added to the plan like any other course.
+
+   Year1 Q1/Q2 is different: the university assigns that schedule directly, so
+   the student never actually "registers" for it - there is no choice to make.
+   Those basic-recommended courses are therefore auto-completed credits from
+   day one, with no placement needed and nothing to add/remove. The only real
+   choices in Year1 Q1/Q2 are the non-basic offerings (自由科目 / 課外プロジェクト /
+   集中講義), which still go through normal registration. */
+const AUTO_COMPLETE_YEAR = 1;
+const AUTO_COMPLETE_QUARTERS = [1,2];
+function basicRecommendedCourseIds(setup){
+  const ids = new Set();
+  if(!setup.cClass) return ids;
+  TIMETABLE.forEach(e=>{
+    if(e.recommendation==="basic" && e.course_id && entryMatchesStudent(e, setup)) ids.add(e.course_id);
+  });
+  return ids;
+}
+function autoCompletedCourseIds(setup){
+  const ids = new Set();
+  if(!setup.cClass) return ids;
+  TIMETABLE.forEach(e=>{
+    if(AUTO_COMPLETE_QUARTERS.includes(e.quarter) && e.year===AUTO_COMPLETE_YEAR &&
+       e.recommendation==="basic" && e.course_id && entryMatchesStudent(e, setup)){
+      ids.add(e.course_id);
+    }
+  });
+  return ids;
+}
+// Same as above but scoped to one specific quarter - a course offered only in
+// Q1 must not also appear under Q2 (and vice versa) just because both quarters
+// are auto-completed overall.
+function autoCompletedCourseIdsForQuarter(setup, quarter){
+  const ids = new Set();
+  if(!setup.cClass || !AUTO_COMPLETE_QUARTERS.includes(quarter)) return ids;
+  TIMETABLE.forEach(e=>{
+    if(e.quarter===quarter && e.year===AUTO_COMPLETE_YEAR &&
+       e.recommendation==="basic" && e.course_id && entryMatchesStudent(e, setup)){
+      ids.add(e.course_id);
+    }
+  });
+  return ids;
+}
+function countedCourseIds(){
+  // union of actively-registered courses and Year1-Q1/Q2 auto-completed courses
+  return new Set([...selectedCourseIds(), ...autoCompletedCourseIds(STATE.setup)]);
+}
+// 進級条件 (basic-recommended credits) counts only what's earned by the end of
+// 2年後期 (Q4) - courses placed in 3年/4年 don't count toward advancing out of
+// 2年, even if they happen to carry a "basic recommended" tag.
+function basicRecommendedCountedIds(){
+  const ids = new Set(autoCompletedCourseIds(STATE.setup));
+  STATE.selections.forEach(s=>{ if(s.year<=2) ids.add(s.courseId); });
+  return ids;
+}
+function basicRecommendedCreditsRegistered(){
+  const basicIds = basicRecommendedCourseIds(STATE.setup);
+  let total = 0;
+  basicRecommendedCountedIds().forEach(cid=>{
+    if(!basicIds.has(cid)) return;
+    const c = coursesById.get(cid);
+    if(c) total += c.credits||0;
+  });
+  return total;
+}
+
+/* ======================= recommendation engine ======================= */
+function extractCodeToken(text){
+  const m = text.match(/[A-Za-z]{1,4}\d{2,4}/);
+  return m ? m[0] : null;
+}
+function computeFieldSuggestions(){
+  // Purely informational (参考程度) - field-recommended courses matching the
+  // student's chosen field(s), for reference only. No bulk-add action.
+  if(!STATE.setup.fields || !STATE.setup.fields.length) return [];
+  const selected = selectedCourseIds();
+  const suggestMap = new Map();
+  TIMETABLE.forEach(e=>{
+    if(e.recommendation!=="field" || !e.course_id) return;
+    if(selected.has(e.course_id)) return;
+    if(!entryMatchesStudent(e, STATE.setup)) return;
+    if(!suggestMap.has(e.course_id)) suggestMap.set(e.course_id, {courseId:e.course_id, year:e.year, quarter:e.quarter});
+  });
+  return Array.from(suggestMap.values());
+}
+function computePrereqWarnings(){
+  const counted = countedCourseIds();
+  const warnings = [];
+  counted.forEach(cid=>{
+    const course = coursesById.get(cid);
+    if(!course || !course.essential_courses.length) return;
+    const missingCodes = [];
+    course.essential_courses.forEach(text=>{
+      const code = extractCodeToken(text);
+      if(!code) return;
+      const target = coursesByCode.get(code);
+      if(target && !counted.has(target.id)) missingCodes.push({code, name: target.name_ja, id: target.id});
+    });
+    if(missingCodes.length) warnings.push({course, missing: missingCodes});
+  });
+  return warnings;
+}
+
+/* ======================= view / tab routing ======================= */
+let currentView = "setup";
+function showView(name){
+  currentView = name;
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active", v.id==="view-"+name));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active", b.dataset.view===name));
+  render();
+}
+document.getElementById("tabs").addEventListener("click", ev=>{
+  const btn = ev.target.closest(".tab-btn");
+  if(!btn) return;
+  if(btn.dataset.view!=="setup" && !STATE.setup.done){
+    showAlert("先に初期設定を完了してください。/ Please complete initial setup first.");
+    return;
+  }
+  showView(btn.dataset.view);
+});
+
+/* ======================= SETUP view ======================= */
+function fillSetupForm(){
+  document.getElementById("input-cclass").value = STATE.setup.cClass || "";
+  document.getElementById("input-eclass").value = STATE.setup.eClass || "";
+  document.querySelectorAll("#field-chips input").forEach(cb=>{
+    cb.checked = STATE.setup.fields.includes(cb.value);
+  });
+  document.querySelectorAll("#license-chips input").forEach(cb=>{
+    cb.checked = (STATE.setup.teacherLicenses||[]).includes(cb.value);
+  });
+  document.getElementById("setup-status").textContent = STATE.setup.done ? "設定済み ✓" : "";
+}
+document.getElementById("btn-save-setup").addEventListener("click", ()=>{
+  const cClass = document.getElementById("input-cclass").value;
+  if(!cClass){ showAlert("Cクラスを選択してください。"); return; }
+  const eClass = document.getElementById("input-eclass").value.trim();
+  const fields = Array.from(document.querySelectorAll("#field-chips input:checked")).map(cb=>cb.value);
+  const teacherLicenses = Array.from(document.querySelectorAll("#license-chips input:checked")).map(cb=>cb.value);
+  STATE.setup = {cClass, eClass, fields, teacherLicenses, done:true};
+  saveState();
+  autoRegisterLicenseMandatoryCourses();
+  saveState();
+  document.getElementById("setup-status").textContent = "保存しました ✓ / Saved";
+  showView("plan");
+});
+
+/* ======================= TIMELINE PLANNER (course selection) view =======================
+   Redesigned around a reference from the university's own registration system:
+   subject-category rows x (year x half-year) columns, with course chips placed
+   inline and a running credit count per half-year, instead of a flat searchable
+   list. Clicking an unselected chip registers it directly; clicking a selected
+   chip opens details; the search box highlights matches instead of filtering
+   rows away (so the category structure stays visible at all times). */
+const TIMELINE_ROWS = [
+  {label:"人文社会", major:"教養科目", minors:["人文・社会"]},
+  {label:"健康・スポーツ", major:"教養科目", minors:["健康・スポーツ科学"]},
+  {label:"外国語", major:"外国語科目", minors:null},
+  {label:"MA/数学", major:"専門教育科目・専門基礎科目", minors:["数学関連科目"]},
+  {label:"NS/自然科学", major:"専門教育科目・専門基礎科目", minors:["自然科学関連科目"]},
+  {label:"LI/コンピュータ基礎", major:"専門教育科目・専門基礎科目", minors:["コンピュータ基礎関連科目"]},
+  {label:"PL/プログラミング", major:"専門教育科目・専門基礎科目", minors:["プログラミング関連科目"]},
+  {label:"FU/コンピュータ理工学基礎", major:"専門教育科目・専門基礎科目", minors:["コンピュータ理工学基礎関連科目"]},
+  {label:"SY/コンピュータシステム", major:"専門教育科目・専門科目", minors:["コンピュータ・システム関連科目"]},
+  {label:"CN/ネットワーク", major:"専門教育科目・専門科目", minors:["コンピュータ・ネットワーク関連科目"]},
+  {label:"IT/アプリケーション", major:"専門教育科目・専門科目", minors:["アプリケーション関連科目"]},
+  {label:"SE/ソフトウェアエンジニアリング", major:"専門教育科目・専門科目", minors:["ソフトウェア・エンジニアリング関連科目"]},
+  {label:"その他専門科目", major:"専門教育科目・専門科目", minors:["その他の科目"]},
+  {label:"PP/実践", major:"専門教育科目・実践科目", minors:["実践科目"]},
+  {label:"教職", major:"教職に関する専門科目", minors:null, teacherOnly:true},
+  {label:"課外プロジェクト・自由科目", major:"課外プロジェクト", minors:null},
+];
+const TIMELINE_GROUPS = [
+  {label:"教養科目", rowLabels:["人文社会","健康・スポーツ"]},
+  {label:"外国語科目", rowLabels:["外国語"]},
+  {label:"専門教育科目", rowLabels:["MA/数学","NS/自然科学","LI/コンピュータ基礎","PL/プログラミング","FU/コンピュータ理工学基礎","SY/コンピュータシステム","CN/ネットワーク","IT/アプリケーション","SE/ソフトウェアエンジニアリング","その他専門科目","PP/実践"]},
+  {label:"教職に関する専門科目", rowLabels:["教職"]},
+  {label:"課外プロジェクト・自由科目", rowLabels:["課外プロジェクト・自由科目"]},
+];
+const collapsedGroups = new Set();
+let highlightedCourseId = null;
+const rowCoursesCache = new Map();
+function coursesForRow(row){
+  if(rowCoursesCache.has(row.label)) return rowCoursesCache.get(row.label);
+  const list = COURSES.filter(c=> c.category.major===row.major && (!row.minors || row.minors.includes(c.category.minor)));
+  rowCoursesCache.set(row.label, list);
+  return list;
+}
+// Deterministic display position for a course: where it's actually registered
+// if selected, otherwise its earliest eligible (year, half) based on official
+// target_year/quarter - intensive (集中) courses are pinned to their first
+// eligible year's 前期 slot with a badge, since they have no fixed half.
+function coursePosition(course){
+  const sel = STATE.selections.find(s=>s.courseId===course.id);
+  if(sel){
+    return {year:sel.year, half:(sel.quarter===1||sel.quarter===2)?"H1":"H2"};
+  }
+  const year = parseInt((course.target_year[0]||"1年").replace("年",""),10) || 1;
+  if(course.quarter.length===0) return {year, half:"H1", intensive:true};
+  const hasH1 = course.quarter.some(q=>q===1||q===2);
+  return {year, half: hasH1 ? "H1" : "H2"};
+}
+function licenseRelevantCodes(){
+  const licenses = STATE.setup.teacherLicenses || [];
+  const codes = new Set();
+  licenses.forEach(key=>{
+    const lic = TEACHING.licenses[key];
+    if(!lic) return;
+    const pool = key==="info_hs" ? TEACHING.subject_matter.info : TEACHING.subject_matter.math;
+    pool.mandatory.forEach(c=>codes.add(c));
+    pool.electives.forEach(c=>codes.add(c));
+    lic.teaching_method_courses.forEach(c=>codes.add(c));
+    if(lic.moral_education_required) codes.add(TEACHING.basic_understanding.moral_education_course);
+  });
+  if(licenses.length){
+    TEACHING.basic_understanding.common_required.forEach(c=>codes.add(c));
+    TEACHING.basic_understanding.practicum_choice.forEach(c=>codes.add(c));
+    TEACHING.other_courses.required.forEach(c=>codes.add(c));
+  }
+  return codes;
+}
+// The subset of licenseRelevantCodes() that is unconditionally required (the
+// ●/○ marks in the official table), as opposed to electives the student picks
+// from to reach a category's minimum. These are auto-registered on setup save,
+// same idea as the Year1 Q1/Q2 auto-completion but as real placements, since a
+// license-mandatory course isn't really an optional choice once the license is
+// declared.
+function licenseMandatoryCodes(){
+  const licenses = STATE.setup.teacherLicenses || [];
+  const codes = new Set();
+  licenses.forEach(key=>{
+    const lic = TEACHING.licenses[key];
+    if(!lic) return;
+    const pool = key==="info_hs" ? TEACHING.subject_matter.info : TEACHING.subject_matter.math;
+    pool.mandatory.forEach(c=>codes.add(c));
+    lic.teaching_method_courses.forEach(c=>codes.add(c));
+    if(lic.moral_education_required) codes.add(TEACHING.basic_understanding.moral_education_course);
+  });
+  if(licenses.length){
+    TEACHING.basic_understanding.common_required.forEach(c=>codes.add(c));
+    TEACHING.other_courses.required.forEach(c=>codes.add(c));
+    // 教育実習１ is specifically required for 中学校一種; 高等学校一種 alone can
+    // choose either 実習１or２, so that stays a real choice, not auto-registered.
+    if(licenses.includes("math_jhs")) codes.add("TE16");
+  }
+  return codes;
+}
+function autoRegisterLicenseMandatoryCourses(){
+  // These are 必修 (mandatory) - there's no real choice for the student, so
+  // unlike manually-added courses (which default to "tentative" until the
+  // student confirms them), these go straight to "confirmed".
+  licenseMandatoryCodes().forEach(code=>{
+    const course = coursesByCode.get(code);
+    if(!course || isCourseSelected(course.id)) return;
+    const groups = groupOfferingsForRegistration(course.id, STATE.setup);
+    if(groups.length===1){
+      addRegistrationGroup(course.id, groups[0].year, groups[0].quarters, "confirmed");
+    } else if(groups.length===0 && course.quarter.length===1 && course.target_year.length){
+      // No timetable data and multiple eligible years (e.g. HS12, offered in
+      // either 1年 or 2年) - default to the earliest eligible year so a
+      // mandatory course isn't silently skipped. The student can still move it.
+      addSelection(course.id, parseInt(course.target_year[0],10), course.quarter[0], "confirmed");
+    }
+  });
+}
+function courseRecommendationBadges(course){
+  const offs = matchedOfferingsForStudent(course.id, STATE.setup);
+  const hasBasic = offs.some(o=>o.recommendation==="basic");
+  const hasField = offs.some(o=>o.recommendation==="field");
+  let html = "";
+  if(hasBasic) html += '<span class="badge basic" title="基本推奨科目（履修計画に追加しなくても卒業要件に自動カウントされます）">基本推奨</span>';
+  if(hasField) html += '<span class="badge field" title="フィールド推奨科目">Field推奨</span>';
+  if(course.category.major==="教職に関する専門科目") html += '<span class="badge te">教職</span>';
+  if(licenseRelevantCodes().has(course.code)) html += '<span class="badge" style="background:#7c3aed;color:#fff;" title="選択中の教員免許状の必要科目">免許</span>';
+  return html;
+}
+function renderSearchBanners(){
+  const box = document.getElementById("search-banners");
+  box.innerHTML = "";
+  const fieldSug = computeFieldSuggestions();
+  if(fieldSug.length){
+    const names = fieldSug.slice(0,6).map(s=>{
+      const c = coursesById.get(s.courseId);
+      return c ? `${c.code} ${c.name_ja}` : s.courseId;
+    }).join("、");
+    const div = document.createElement("div");
+    div.className = "banner field";
+    div.innerHTML = `<div class="banner-body"><div class="banner-title">フィールド推奨科目（参考） / Field-recommended courses (for reference)</div>
+      <div>${names}${fieldSug.length>6?" 他":""}</div></div>`;
+    box.appendChild(div);
+  }
+  const prereq = computePrereqWarnings();
+  if(prereq.length){
+    const div = document.createElement("div");
+    div.className = "banner warn";
+    const rows = prereq.slice(0,5).map(p=>`${p.course.code} ${p.course.name_ja} → 先修: ${p.missing.map(m=>m.code).join(", ")}`).join("<br>");
+    div.innerHTML = `<div class="banner-body"><div class="banner-title">先修科目が未充足の科目があります / Prerequisite courses missing</div>${rows}</div>`;
+    box.appendChild(div);
+  }
+}
+function renderCourseDetail(container, c){
+  if(!container) return;
+  const isAutoCompleted = autoCompletedCourseIds(STATE.setup).has(c.id);
+  // Only show offerings that actually apply to this student (their C-class /
+  // E-class / field) - other classes' sections are never shown or selectable
+  // here. Each offering already bundles every day/period it meets across the
+  // week into one row with one button, since registering means attending all
+  // of them, not picking a single session. Year1 Q1/Q2 slots are excluded here
+  // when the course is auto-completed - there's nothing to register, it's
+  // already counted.
+  const groups = groupOfferingsForRegistration(c.id, STATE.setup)
+    .filter(g=> !(isAutoCompleted && g.year===AUTO_COMPLETE_YEAR && g.quarters.some(qq=>AUTO_COMPLETE_QUARTERS.includes(qq))));
+  const autoNoteHtml = isAutoCompleted
+    ? `<div class="hint">この科目は1年次の標準クラス編成科目のため、自動的に履修済みとしてカウントされています。登録操作は不要です。</div>`
+    : "";
+  let offerHtml = "";
+  if(groups.length){
+    offerHtml = groups.map(g=>{
+      const already = g.quarters.every(qq=>STATE.selections.some(s=>s.courseId===c.id && s.year===g.year && s.quarter===qq));
+      return `<div class="offer-row">
+        <span>${g.year}年 ${quarterLabel(g.quarters)}　${g.scheduleStr}${g.rooms.length?"　("+g.rooms.join("/")+")":""}</span>
+        <button class="btn small" data-add-offer='${JSON.stringify({courseId:c.id,year:g.year,quarters:g.quarters})}' ${already?"disabled":""}>
+          ${already?"登録済み":"登録"}
+        </button>
+      </div>`;
+    }).join("");
+  } else if(!isAutoCompleted){
+    // manual placement fallback using course-level target_year / quarter fields
+    // (courses with no fixed weekly schedule, e.g. 自由科目・課外プロジェクト・集中講義)
+    offerHtml = `<div class="hint">あなたのクラスに一致する開講情報が見つかりませんでした。学年・学期を指定して手動で追加してください。</div>
+      <div class="offer-row">
+        <select class="manual-year">${c.target_year.map(y=>`<option value="${y.replace('年','')}">${y}</option>`).join("")}</select>
+        <select class="manual-quarter">${(c.quarter.length?c.quarter:[1,2,3,4]).map(q=>`<option value="${q}">Q${q}</option>`).join("")}</select>
+        <button class="btn small" data-add-manual="${c.id}">追加</button>
+      </div>`;
+  }
+  const essentialHtml = c.essential_courses.length
+    ? `<p><b>先修科目 / Essential:</b> ${c.essential_courses.join("; ")}</p>` : "";
+  container.innerHTML = `
+    <p><b>担当:</b> ${c.coordinator||"-"}　<b>教員:</b> ${c.instructors.join(", ")||"-"}</p>
+    ${essentialHtml}
+    <p>${(c.outline||"").slice(0,400)}${c.outline && c.outline.length>400 ? "…" : ""}</p>
+    ${autoNoteHtml}
+    ${(groups.length || !isAutoCompleted) ? `<div><b>開講情報 / Offerings</b></div>${offerHtml}` : ""}
+    <div style="margin-top:.5rem;">
+      ${selectedRegistrationsForCourse(c.id).map(r=>`
+        <span class="plan-chip${r.status==="tentative"?" tentative":""}" style="display:inline-flex;">
+          ${r.year}年${quarterLabel(r.quarters)}
+          <span class="status-toggle ${r.status}" data-toggle-status='${JSON.stringify({courseId:c.id,year:r.year,quarters:r.quarters})}'>${r.status==="tentative"?"検討中":"確定"}</span>
+          <span class="x" data-remove-reg='${JSON.stringify({courseId:c.id,year:r.year,quarters:r.quarters})}'>×</span>
+        </span>`).join("")}
+    </div>
+  `;
+  container.querySelectorAll("[data-add-offer]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const d = JSON.parse(btn.dataset.addOffer);
+      addRegistrationGroup(d.courseId, d.year, d.quarters);
+      render();
+      renderCourseDetail(container, c);
+    });
+  });
+  container.querySelectorAll("[data-remove-reg]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const d = JSON.parse(btn.dataset.removeReg);
+      removeRegistrationGroup(d.courseId, d.year, d.quarters);
+      render();
+      renderCourseDetail(container, c);
+    });
+  });
+  container.querySelectorAll("[data-toggle-status]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const d = JSON.parse(btn.dataset.toggleStatus);
+      toggleRegistrationStatus(d.courseId, d.year, d.quarters);
+      render();
+      renderCourseDetail(container, c);
+    });
+  });
+  const manualBtn = container.querySelector("[data-add-manual]");
+  if(manualBtn){
+    manualBtn.addEventListener("click", ()=>{
+      const y = parseInt(container.querySelector(".manual-year").value,10);
+      const q = parseInt(container.querySelector(".manual-quarter").value,10);
+      addSelection(manualBtn.dataset.addManual, y, q);
+      render();
+      renderCourseDetail(container, c);
+    });
+  }
+}
+function openCourseModal(courseId){
+  const course = coursesById.get(courseId);
+  if(!course) return;
+  highlightedCourseId = courseId;
+  const root = document.getElementById("modal-root");
+  root.innerHTML = `
+    <div class="modal-backdrop" id="modal-backdrop">
+      <div class="modal">
+        <h3 style="margin-bottom:.2rem;">${course.code} ${course.name_ja}${courseRecommendationBadges(course)}</h3>
+        <div class="hint" style="margin-bottom:.6rem;">${course.name_en||""}</div>
+        <div id="modal-detail-body" class="cc-detail"></div>
+        <div style="text-align:right; margin-top:1rem;">
+          <button class="btn" id="modal-close-btn">閉じる</button>
+        </div>
+      </div>
+    </div>
+  `;
+  renderCourseDetail(document.getElementById("modal-detail-body"), course);
+  document.getElementById("modal-backdrop").addEventListener("click", ev=>{
+    if(ev.target.id==="modal-backdrop") closeModal();
+  });
+  document.getElementById("modal-close-btn").addEventListener("click", closeModal);
+}
+function closeModal(){
+  document.getElementById("modal-root").innerHTML = "";
+  render();
+}
+// Published Artifacts run in a sandboxed iframe where native alert()/confirm()
+// are blocked (confirm() silently returns false), so the reset button and
+// other native-dialog flows did nothing. These reuse the existing modal look.
+function showAlert(message){
+  const root = document.getElementById("modal-root");
+  root.innerHTML = `<div class="modal-backdrop" id="alert-backdrop"><div class="modal">
+    <div id="alert-msg" style="white-space:pre-wrap;"></div>
+    <div style="text-align:right; margin-top:1rem;"><button class="btn primary" id="alert-ok-btn">OK</button></div>
+    </div></div>`;
+  document.getElementById("alert-msg").textContent = message;
+  const close = ()=>{ root.innerHTML = ""; };
+  document.getElementById("alert-ok-btn").addEventListener("click", close);
+  document.getElementById("alert-backdrop").addEventListener("click", ev=>{
+    if(ev.target.id==="alert-backdrop") close();
+  });
+}
+function showConfirm(message, onConfirm){
+  const root = document.getElementById("modal-root");
+  root.innerHTML = `<div class="modal-backdrop" id="confirm-backdrop"><div class="modal">
+    <div id="confirm-msg" style="white-space:pre-wrap;"></div>
+    <div style="text-align:right; margin-top:1rem; display:flex; gap:.5rem; justify-content:flex-end;">
+    <button class="btn" id="confirm-cancel-btn">キャンセル</button><button class="btn danger" id="confirm-ok-btn">OK</button>
+    </div></div></div>`;
+  document.getElementById("confirm-msg").textContent = message;
+  const close = ()=>{ root.innerHTML = ""; };
+  document.getElementById("confirm-cancel-btn").addEventListener("click", close);
+  document.getElementById("confirm-ok-btn").addEventListener("click", ()=>{ root.innerHTML = ""; onConfirm(); });
+  document.getElementById("confirm-backdrop").addEventListener("click", ev=>{
+    if(ev.target.id==="confirm-backdrop") close();
+  });
+}
+function renderTimelinePlanner(){
+  renderSearchBanners();
+  const query = document.getElementById("search-input").value.trim().toLowerCase();
+  const showTE = document.getElementById("f-show-te").checked;
+  const autoCompleted = autoCompletedCourseIds(STATE.setup);
+  const halfTotals = computeHalfYearTotals();
+  const licenseCodes = licenseRelevantCodes();
+  const highlightedCourse = highlightedCourseId ? coursesById.get(highlightedCourseId) : null;
+  const prereqCodes = highlightedCourse
+    ? new Set(highlightedCourse.essential_courses.map(t=>extractCodeToken(t)).filter(Boolean))
+    : null;
+
+  const grid = document.getElementById("tl-grid");
+  const wrap = grid.closest(".tl-wrap");
+  const prevScrollTop = wrap ? wrap.scrollTop : 0;
+  const prevScrollLeft = wrap ? wrap.scrollLeft : 0;
+  grid.innerHTML = "";
+
+  grid.appendChild(el("div","tl-head corner",""));
+  for(let y=1;y<=4;y++){
+    ["H1","H2"].forEach(half=>{
+      const cap = halfTotals[y][half];
+      const over = cap>CAP_PER_SEMESTER;
+      const head = document.createElement("div");
+      head.className = `tl-head tl-y${y}`;
+      head.innerHTML = `${y}年${half==="H1"?"前期":"後期"}<span class="cap ${over?"over":""}">${cap}/${CAP_PER_SEMESTER}</span>`;
+      grid.appendChild(head);
+    });
+  }
+  // Row labels (e.g. "人文社会") freeze just below the sticky column-header
+  // row via an inner sticky span - measure the header's actual rendered
+  // height so the freeze offset always matches it exactly.
+  grid.style.setProperty("--tl-header-h", grid.querySelector(".tl-head.corner").getBoundingClientRect().height+"px");
+
+  TIMELINE_GROUPS.forEach(group=>{
+    const rows = TIMELINE_ROWS.filter(r=>group.rowLabels.includes(r.label) && (!r.teacherOnly || (STATE.setup.teacherLicenses||[]).length || showTE));
+    if(!rows.length) return;
+    const collapsed = collapsedGroups.has(group.label);
+    const groupHeader = document.createElement("div");
+    groupHeader.className = "tl-group-header"+(collapsed?" collapsed":"");
+    groupHeader.innerHTML = `<span class="arrow">▾</span> ${group.label}`;
+    groupHeader.addEventListener("click", ()=>{
+      if(collapsedGroups.has(group.label)) collapsedGroups.delete(group.label);
+      else collapsedGroups.add(group.label);
+      renderTimelinePlanner();
+    });
+    grid.appendChild(groupHeader);
+    if(collapsed) return;
+
+    rows.forEach(row=>{
+      const label = document.createElement("div");
+      label.className = "tl-row-label";
+      label.innerHTML = `<span>${row.label}</span>`;
+      grid.appendChild(label);
+
+      const cells = {};
+      for(let y=1;y<=4;y++){
+        ["H1","H2"].forEach(half=>{
+          const cell = document.createElement("div");
+          cell.className = `tl-cell tl-y${y}`;
+          cells[y+"-"+half] = cell;
+        });
+      }
+
+      coursesForRow(row).forEach(c=>{
+        const pos = coursePosition(c);
+        const cell = cells[pos.year+"-"+pos.half];
+        if(!cell) return;
+        const selected = isCourseSelected(c.id);
+        const isTentative = selected && courseRegistrationStatus(c.id)==="tentative";
+        const isAuto = autoCompleted.has(c.id);
+        const offs = matchedOfferingsForStudent(c.id, STATE.setup);
+        const rec = offs.some(o=>o.recommendation==="basic") ? "basic" : offs.some(o=>o.recommendation==="field") ? "field" : "";
+        const matchesQuery = !query || (c.code+" "+c.name_ja+" "+c.name_en).toLowerCase().includes(query);
+        const isPrereq = prereqCodes && prereqCodes.has(c.code);
+        const isLicense = licenseCodes.has(c.code);
+        const chip = document.createElement("div");
+        chip.className = "tl-chip"
+          + (isAuto ? " auto" : selected ? " selected" : " avail")
+          + (rec ? " "+rec : "")
+          + (pos.intensive ? " intensive" : "")
+          + (isPrereq ? " prereq-highlight" : "")
+          + (isLicense ? " license-required" : "")
+          + (isTentative ? " tentative" : "");
+        if(!matchesQuery) chip.style.opacity = "0.3";
+        chip.dataset.courseId = c.id;
+        chip.title = (c.name_en||"") + (isLicense?"（選択中の教員免許状の必要科目）":"") + (isTentative?"（検討中）":"");
+        chip.textContent = c.code+" "+c.name_ja+(pos.intensive?"（集中）":"");
+        cell.appendChild(chip);
+      });
+
+      for(let y=1;y<=4;y++){
+        ["H1","H2"].forEach(half=>grid.appendChild(cells[y+"-"+half]));
+      }
+    });
+  });
+
+  const thesisLabel = document.createElement("div");
+  thesisLabel.className = "tl-row-label";
+  thesisLabel.innerHTML = "<span>卒業論文</span>";
+  grid.appendChild(thesisLabel);
+  const thesisRow = document.createElement("div");
+  thesisRow.className = "tl-fixed-row";
+  thesisRow.textContent = "卒業論文（8単位）は4年次に自動計上されます。";
+  grid.appendChild(thesisRow);
+
+  grid.querySelectorAll(".tl-chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      const cid = chip.dataset.courseId;
+      if(chip.classList.contains("avail")){
+        quickAddCourse(cid);
+      } else if(chip.classList.contains("auto")){
+        highlightedCourseId = (highlightedCourseId===cid) ? null : cid;
+        renderTimelinePlanner();
+      } else {
+        openCourseModal(cid);
+      }
+    });
+  });
+  // Rebuilding the grid replaces every node, which would otherwise reset the
+  // (now-internal) scroll pane back to the top on every selection/highlight.
+  if(wrap){ wrap.scrollTop = prevScrollTop; wrap.scrollLeft = prevScrollLeft; }
+}
+document.getElementById("search-input").addEventListener("input", renderTimelinePlanner);
+document.getElementById("f-show-te").addEventListener("change", renderTimelinePlanner);
+
+/* ======================= TIMETABLE view ======================= */
+function renderTimetable(){
+  const year = parseInt(document.getElementById("tt-year").value,10);
+  const quarter = parseInt(document.getElementById("tt-quarter").value,10);
+  document.getElementById("tt-context").textContent =
+    `Cクラス:${STATE.setup.cClass||"-"} Eクラス:${STATE.setup.eClass||"-"} フィールド:${(STATE.setup.fields||[]).join(",")||"-"}`;
+
+  const gridEl = document.getElementById("tt-grid");
+  const autoInfoEl = document.getElementById("tt-auto-info");
+  const unscheduledEl = document.getElementById("tt-unscheduled");
+
+  // Year1 Q1/Q2 is assigned directly by the university - there is no weekly
+  // schedule for the student to browse or choose from for the mandatory
+  // courses, so show a summary instead of an (mostly empty/misleading) grid.
+  if(year===AUTO_COMPLETE_YEAR && AUTO_COMPLETE_QUARTERS.includes(quarter)){
+    gridEl.classList.add("hidden");
+    unscheduledEl.textContent = "";
+    autoInfoEl.classList.remove("hidden");
+    const autoCourses = Array.from(autoCompletedCourseIdsForQuarter(STATE.setup, quarter)).map(id=>coursesById.get(id)).filter(Boolean);
+    const electives = placementsFor(year, quarter).map(p=>coursesById.get(p.courseId)).filter(Boolean);
+    autoInfoEl.innerHTML = `
+      <div class="banner field">
+        <div class="banner-body">
+          <div class="banner-title">1年 第${quarter}学期は大学側の標準クラス編成のため時間割はありません</div>
+          <div>基本推奨科目は自動的に履修済みとしてカウントされます。この学期に選べるのは自由科目・課外プロジェクト・集中講義です（「科目を探す」から追加できます）。</div>
+        </div>
+      </div>
+      <div class="hint" style="margin:.6rem 0 .3rem;font-weight:700;">自動履修済み（${autoCourses.reduce((s,c)=>s+(c.credits||0),0)}単位）</div>
+      <div class="course-list">${autoCourses.map(c=>`<div class="course-card"><b>${c.code}</b> ${c.name_ja} <span class="hint">(${c.credits}単位)</span></div>`).join("") || '<div class="hint">なし</div>'}</div>
+      ${electives.length ? `<div class="hint" style="margin:.8rem 0 .3rem;font-weight:700;">選択した自由科目・課外プロジェクト・集中講義</div>
+      <div class="course-list">${electives.map(c=>`<div class="course-card"><b>${c.code}</b> ${c.name_ja} <span class="hint">(${c.credits}単位)</span></div>`).join("")}</div>` : ""}
+    `;
+    return;
+  }
+  gridEl.classList.remove("hidden");
+  autoInfoEl.classList.add("hidden");
+
+  const placements = placementsFor(year, quarter);
+  const cellMap = new Map(); // "day-period" -> [{course,entry}]
+  const unresolved = [];
+  placements.forEach(p=>{
+    const course = coursesById.get(p.courseId);
+    if(!course) return;
+    // Intensive/block-format courses (集中講義, quarter:[]) don't occupy a
+    // recurring weekly slot even if the raw timetable happens to list a
+    // room/period for their block week - keep them out of the grid.
+    if(course.quarter.length===0){ unresolved.push(course); return; }
+    // 課外プロジェクト has no per-course timetable row but always meets 木9,10.
+    if(course.category.major==="課外プロジェクト"){
+      EXTRACURRICULAR_PERIODS.forEach(period=>{
+        const dp = EXTRACURRICULAR_DAY+"-"+period;
+        if(!cellMap.has(dp)) cellMap.set(dp, []);
+        cellMap.get(dp).push({course, entry:{code:course.code, recommendation:"general", room:""}, selId:p.id, status:p.status});
+      });
+      return;
+    }
+    // Only ever plot the sessions that actually apply to this student's class -
+    // never fall back to showing every other class's sections for this course,
+    // since those aren't the ones the student would actually attend.
+    const matches = offeringsForCourse(p.courseId)
+      .filter(o=>o.year===year && o.quarter===quarter && entryMatchesStudent(o, STATE.setup));
+    if(!matches.length){ unresolved.push(course); return; }
+    // de-dupe by day/period (avoid showing duplicate identical class-assignment rows twice)
+    const seenDP = new Set();
+    matches.forEach(o=>{
+      const dp = o.day+"-"+o.period;
+      if(seenDP.has(dp)) return;
+      seenDP.add(dp);
+      if(!cellMap.has(dp)) cellMap.set(dp, []);
+      cellMap.get(dp).push({course, entry:o, selId:p.id, status:p.status});
+    });
+  });
+
+  // banners: field suggestions / prereq warnings scoped to this year/quarter
+  const bannerBox = document.getElementById("tt-banners");
+  bannerBox.innerHTML = "";
+  const fieldSug = computeFieldSuggestions().filter(s=>s.year===year && s.quarter===quarter);
+  if(fieldSug.length){
+    const div = document.createElement("div");
+    div.className = "banner field";
+    div.innerHTML = `<div class="banner-body"><div class="banner-title">この学期のフィールド推奨科目（参考）</div>
+      ${fieldSug.map(s=>{const c=coursesById.get(s.courseId); return c?`${c.code} ${c.name_ja}`:"";}).join("、")}</div>`;
+    bannerBox.appendChild(div);
+  }
+
+  // build grid
+  const grid = document.getElementById("tt-grid");
+  grid.innerHTML = "";
+  const corner = document.createElement("div"); corner.className="tt-cell tt-head"; grid.appendChild(corner);
+  DAYS.forEach(d=>{
+    const h = document.createElement("div"); h.className="tt-cell tt-head"; h.textContent = d; grid.appendChild(h);
+  });
+  PERIODS.forEach(p=>{
+    const ph = document.createElement("div"); ph.className="tt-cell tt-period"; ph.textContent = p; grid.appendChild(ph);
+    DAYS.forEach(d=>{
+      const cell = document.createElement("div"); cell.className="tt-cell";
+      const items = cellMap.get(d+"-"+p) || [];
+      const conflict = items.length>1;
+      items.forEach(it=>{
+        const box = document.createElement("div");
+        box.className = "tt-course "+(it.entry.recommendation==="basic"?"basic":it.entry.recommendation==="field"?"field":"")+(conflict?" conflict":"")+(it.status==="tentative"?" tentative":"");
+        box.title = (it.course.name_en||"") + (it.status==="tentative"?"（検討中）":"");
+        box.innerHTML = `${it.entry.code} ${it.course.name_ja}<span class="room">${it.entry.room||""}</span>`;
+        cell.appendChild(box);
+      });
+      grid.appendChild(cell);
+    });
+  });
+
+  document.getElementById("tt-unscheduled").textContent = unresolved.length
+    ? "固定の曜日・時限情報がない選択科目: " + unresolved.map(c=>c.code+" "+c.name_ja).join("、")
+    : "";
+}
+document.getElementById("tt-year").addEventListener("change", renderTimetable);
+document.getElementById("tt-quarter").addEventListener("change", renderTimetable);
+
+/* ======================= PLAN GRID view ======================= */
+function creditsOfIds(ids){
+  return Array.from(ids).reduce((sum,id)=> sum + (coursesById.get(id)?.credits||0), 0);
+}
+// 教職に関する専門科目、自由科目（課外プロジェクト・ベンチャー系）、集中講義 (no fixed
+// weekly slot) don't count against the 前後期28単位/年間56単位 registration cap -
+// only courses that actually occupy a normal weekly course-load slot do.
+// (卒業論文 doesn't need a check here - it's never a real STATE.selections entry,
+// it's added straight into the graduation total as a fixed 8-unit constant.)
+function countsTowardRegistrationCap(course){
+  if(!course) return false;
+  if(course.category.major==="教職に関する専門科目") return false;
+  if(course.category.major==="課外プロジェクト") return false;
+  if(course.quarter.length===0) return false; // 集中講義
+  return true;
+}
+// Per (year, half-year) registered-credit totals counted against the
+// registration cap, deduped so a course spanning both quarters of a half only
+// counts once - used by the timeline planner's header cap counters.
+function computeHalfYearTotals(){
+  const result = {};
+  for(let y=1;y<=4;y++){
+    const idsByQuarter = {1:new Set(),2:new Set(),3:new Set(),4:new Set()};
+    if(y===AUTO_COMPLETE_YEAR){
+      AUTO_COMPLETE_QUARTERS.forEach(q=>{
+        autoCompletedCourseIdsForQuarter(STATE.setup, q).forEach(cid=>idsByQuarter[q].add(cid));
+      });
+    }
+    [1,2,3,4].forEach(q=>{
+      placementsFor(y,q).forEach(p=>idsByQuarter[q].add(p.courseId));
+    });
+    [1,2,3,4].forEach(q=>{
+      idsByQuarter[q] = new Set(Array.from(idsByQuarter[q]).filter(cid=>countsTowardRegistrationCap(coursesById.get(cid))));
+    });
+    const idsH1 = new Set([...idsByQuarter[1], ...idsByQuarter[2]]);
+    const idsH2 = new Set([...idsByQuarter[3], ...idsByQuarter[4]]);
+    result[y] = {H1:creditsOfIds(idsH1), H2:creditsOfIds(idsH2), idsH1, idsH2};
+  }
+  return result;
+}
+function renderPlan(){
+  const grid = document.getElementById("plan-grid");
+  grid.innerHTML = "";
+  grid.appendChild(el("div","pg-head",""));
+  for(let q=1;q<=4;q++) grid.appendChild(el("div","pg-head","第"+q+"学期"));
+  grid.appendChild(el("div","pg-head","学年計"));
+
+  for(let y=1;y<=4;y++){
+    grid.appendChild(el("div","pg-year",y+"年"));
+    const idsByQuarter = {};
+    for(let q=1;q<=4;q++){
+      const cell = document.createElement("div"); cell.className="pg-cell";
+      let qTotal = 0;
+      idsByQuarter[q] = new Set();
+      // Year1 Q1/Q2: the university assigns this schedule directly - show the
+      // auto-completed basic-recommended courses as a fixed (non-removable) list.
+      // Scoped to this exact quarter so a Q1-only course doesn't also show under Q2.
+      if(y===AUTO_COMPLETE_YEAR && AUTO_COMPLETE_QUARTERS.includes(q)){
+        autoCompletedCourseIdsForQuarter(STATE.setup, q).forEach(cid=>{
+          const c = coursesById.get(cid);
+          if(!c) return;
+          qTotal += c.credits||0;
+          idsByQuarter[q].add(cid);
+          const chip = document.createElement("div");
+          chip.className = "plan-chip basic";
+          chip.innerHTML = `<span>${c.code} (${c.credits})</span><span class="hint">自動</span>`;
+          cell.appendChild(chip);
+        });
+      }
+      const placements = placementsFor(y,q);
+      placements.forEach(p=>{
+        const c = coursesById.get(p.courseId);
+        if(!c) return;
+        qTotal += c.credits||0;
+        idsByQuarter[q].add(c.id);
+        const offs = matchedOfferingsForStudent(c.id, STATE.setup).filter(o=>o.year===y&&o.quarter===q);
+        const rec = offs.some(o=>o.recommendation==="basic") ? "basic" : offs.some(o=>o.recommendation==="field") ? "field" : "";
+        // Remove the whole registration (both quarters for a 前期/後期 course), not just this one placement.
+        const semesterPair = semesterPairFor(c);
+        const removeQuarters = semesterPair || [q];
+        const chip = document.createElement("div");
+        chip.className = "plan-chip "+rec+(p.status==="tentative"?" tentative":"");
+        chip.innerHTML = `<span>${c.code} (${c.credits})</span><span class="status-toggle ${p.status}" data-toggle-status='${JSON.stringify({courseId:c.id,year:y,quarters:removeQuarters})}'>${p.status==="tentative"?"検討中":"確定"}</span><span class="x" data-remove-reg='${JSON.stringify({courseId:c.id,year:y,quarters:removeQuarters})}'>×</span>`;
+        cell.appendChild(chip);
+      });
+      const label = document.createElement("div");
+      label.className = "hint";
+      label.style.marginTop = ".2rem";
+      label.textContent = qTotal + " 単位";
+      cell.appendChild(label);
+      grid.appendChild(cell);
+    }
+    // 半期(前期=Q1+Q2 / 後期=Q3+Q4)・1年間の登録単位数は、同じ科目が複数学期に
+    // またがって配置されていても1回分としてカウントする（履修登録単位数上限の考え方）。
+    // 教職に関する専門科目・自由科目（課外プロジェクト等）・集中講義は上限の対象外
+    // (countsTowardRegistrationCap) なので、この上限チェック用の集計からのみ除外する
+    // - 各学期セルに表示する qTotal（上のループ内）はそれらも含めた実際の登録内容のまま。
+    const capIdsByQuarter = {};
+    for(let q=1;q<=4;q++){
+      capIdsByQuarter[q] = new Set(Array.from(idsByQuarter[q]).filter(cid=>countsTowardRegistrationCap(coursesById.get(cid))));
+    }
+    const h1Ids = new Set([...capIdsByQuarter[1], ...capIdsByQuarter[2]]);
+    const h2Ids = new Set([...capIdsByQuarter[3], ...capIdsByQuarter[4]]);
+    const yearIds = new Set([...h1Ids, ...h2Ids]);
+    const h1Total = creditsOfIds(h1Ids), h2Total = creditsOfIds(h2Ids), yearTotal = creditsOfIds(yearIds);
+
+    const totalCell = document.createElement("div");
+    totalCell.className = "pg-total"+(yearTotal>CAP_PER_YEAR?" over":"");
+    totalCell.innerHTML = `<div>${yearTotal} 単位</div>
+      <div class="hint" style="font-weight:400;${h1Total>CAP_PER_SEMESTER?'color:var(--danger);':''}">前期 ${h1Total}${h1Total>CAP_PER_SEMESTER?' 超過!':''}</div>
+      <div class="hint" style="font-weight:400;${h2Total>CAP_PER_SEMESTER?'color:var(--danger);':''}">後期 ${h2Total}${h2Total>CAP_PER_SEMESTER?' 超過!':''}</div>`;
+    grid.appendChild(totalCell);
+  }
+
+  // Only credits that count toward the 128-unit graduation requirement -
+  // 教職に関する専門科目 (teaching license) courses must never be included here,
+  // even though they're registered and occupy real quarter slots above.
+  document.getElementById("plan-total").textContent = graduationCreditTotal();
+  grid.querySelectorAll("[data-remove-reg]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const d = JSON.parse(btn.dataset.removeReg);
+      removeRegistrationGroup(d.courseId, d.year, d.quarters);
+      render();
+    });
+  });
+  grid.querySelectorAll("[data-toggle-status]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const d = JSON.parse(btn.dataset.toggleStatus);
+      toggleRegistrationStatus(d.courseId, d.year, d.quarters);
+      render();
+    });
+  });
+}
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text!==undefined) e.textContent = text;
+  return e;
+}
+
+/* ======================= DASHBOARD view ======================= */
+// ======================= teaching license (教職課程) progress =======================
+// Based on the official course-to-category tables in the 2025 Campus Guide
+// (教育職員免許法施行規則第22条の6). math_jhs/math_hs share the same subject-matter
+// pool; info_hs has its own. Credits only count once a course is actually
+// registered (or, for Year1 Q1/Q2, auto-completed), same as everywhere else.
+function creditsFromCodes(codes){
+  const counted = countedCourseIds();
+  let total = 0;
+  codes.forEach(code=>{
+    const c = coursesByCode.get(code);
+    if(c && counted.has(c.id)) total += c.credits||0;
+  });
+  return total;
+}
+function computeLicenseProgress(licenseKey){
+  const lic = TEACHING.licenses[licenseKey];
+  const pool = licenseKey==="info_hs" ? TEACHING.subject_matter.info : TEACHING.subject_matter.math;
+  const subjectCodes = [...pool.mandatory, ...pool.electives];
+  const subjectCredits = creditsFromCodes(subjectCodes);
+  const methodCodes = lic.teaching_method_courses;
+  const methodCredits = creditsFromCodes(methodCodes);
+  const subjectCategoryTotal = subjectCredits + methodCredits;
+
+  const basicCodes = TEACHING.basic_understanding.common_required.slice();
+  if(lic.moral_education_required) basicCodes.push(TEACHING.basic_understanding.moral_education_course);
+  basicCodes.push(...TEACHING.basic_understanding.practicum_choice);
+  const basicCredits = creditsFromCodes(basicCodes);
+
+  return {
+    subjectCredits, subjectMin: pool.min, subjectCodes,
+    methodCredits, methodMin: lic.teaching_method_min, methodCodes,
+    subjectCategoryTotal, subjectCategoryMin: lic.subject_category_min,
+    basicCredits, basicMin: lic.basic_understanding_min, basicCodes,
+    combinedTotal: subjectCategoryTotal + basicCredits, combinedMin: lic.combined_min,
+  };
+}
+function creditsByReqKey(){
+  const totals = new Map();
+  countedCourseIds().forEach(cid=>{
+    const c = coursesById.get(cid);
+    if(!c) return;
+    const target = mapCategoryToReq(c.category.major, c.category.minor);
+    if(!target) return;
+    totals.set(target, (totals.get(target)||0) + (c.credits||0));
+  });
+  return totals;
+}
+// Credits counted toward the 128-unit graduation requirement only - sums
+// GRADREQ.categories (liberal/foreign/specialized/thesis). 教職に関する専門科目
+// (teaching_license) and 課外プロジェクト (free_elective) are tracked separately
+// and must NOT be added into this figure anywhere they're displayed.
+function graduationCreditTotal(){
+  const totals = creditsByReqKey();
+  let total = 0;
+  GRADREQ.categories.forEach(cat=>{
+    if(cat.auto){ total += cat.min; return; }
+    if(cat.subcategories && cat.subcategories.length){
+      total += cat.subcategories.reduce((s,sub)=> s + (totals.get(sub.key)||0), 0);
+    } else {
+      total += totals.get(cat.key) || 0;
+    }
+  });
+  return total;
+}
+function renderDashboard(){
+  const totals = creditsByReqKey();
+  const body = document.getElementById("dashboard-body");
+  const basicCredits = basicRecommendedCreditsRegistered();
+  body.innerHTML = `<p class="hint">※ 1年 第1・第2学期は大学側の標準クラス編成のため、基本推奨科目は自動的にカウントされます。それ以外は「履修計画」に追加（履修登録）した科目のみがカウントされます。</p>
+    <div class="dash-cat" style="margin-bottom:1.2rem;">
+      <h3>進級条件 / Year-Advancement Requirement</h3>
+      <p class="hint">2年後期（Q4）までに基本推奨科目から${PROMOTION_MIN_BASIC_CREDITS}単位以上の取得が進級条件です。3年次以降に履修した基本推奨科目はここにはカウントされません。</p>
+    </div>`;
+  body.appendChild(dashRow("基本推奨科目からの履修単位", "Credits from basic-recommended courses", basicCredits, PROMOTION_MIN_BASIC_CREDITS, false, {ids:basicRecommendedCourseIds(STATE.setup), countedIds:basicRecommendedCountedIds()}));
+
+  const overallEarned = graduationCreditTotal();
+  const overallMin = GRADREQ.total_min;
+
+  GRADREQ.categories.forEach(cat=>{
+    const catDiv = document.createElement("div");
+    catDiv.className = "dash-cat";
+    let catEarned;
+    if(cat.auto){
+      catEarned = cat.min; // 卒業論文は自動計上
+    } else if(cat.subcategories && cat.subcategories.length){
+      // specialized total includes all mapped sub + other; use direct sum across its subkeys
+      catEarned = cat.subcategories.reduce((s,sub)=> s + (totals.get(sub.key)||0), 0);
+    } else {
+      catEarned = totals.get(cat.key) || 0;
+    }
+    const catFillKeys = cat.auto ? null : (cat.subcategories && cat.subcategories.length ? cat.subcategories.map(s=>s.key) : [cat.key]);
+    catDiv.appendChild(dashRow(cat.name_ja, cat.name_en, catEarned, cat.min, cat.auto, catFillKeys));
+    (cat.subcategories||[]).forEach(sub=>{
+      const subEarned = totals.get(sub.key) || 0;
+      const row = dashRow(sub.name_ja, sub.name_en, subEarned, sub.min, false, [sub.key]);
+      row.classList.add("dash-sub");
+      catDiv.appendChild(row);
+    });
+    body.appendChild(catDiv);
+  });
+
+  const totalDiv = document.createElement("div");
+  totalDiv.className = "dash-cat";
+  totalDiv.innerHTML = "<h3>合計 / Total</h3>";
+  totalDiv.appendChild(dashRow("卒業要件合計", "Total required", overallEarned, overallMin, false));
+  body.appendChild(totalDiv);
+
+  // teaching license (separate tally)
+  const teDiv = document.createElement("div");
+  teDiv.className = "dash-cat";
+  teDiv.innerHTML = `<h3>教職課程（別集計） / Teaching License (tracked separately)</h3>
+    <p class="hint">${GRADREQ.teaching_license.note}</p>`;
+  body.appendChild(teDiv);
+
+  const selectedLicenses = STATE.setup.teacherLicenses || [];
+  if(selectedLicenses.length){
+    const otherCredits = creditsFromCodes(TEACHING.other_courses.required);
+    selectedLicenses.forEach(key=>{
+      const lic = TEACHING.licenses[key];
+      if(!lic) return;
+      const p = computeLicenseProgress(key);
+      const licDiv = document.createElement("div");
+      licDiv.className = "dash-cat";
+      licDiv.innerHTML = `<h3>${lic.name_ja}<br><small style="font-weight:400;">${lic.name_en}</small></h3>`;
+      licDiv.appendChild(dashRow("教科に関する専門的事項", "Subject-matter expertise courses", p.subjectCredits, p.subjectMin, false, {codes:p.subjectCodes}));
+      licDiv.appendChild(dashRow("各教科の指導法", "Subject teaching methods", p.methodCredits, p.methodMin, false, {codes:p.methodCodes}));
+      licDiv.appendChild(dashRow("教科及び教科の指導法に関する科目（合計）", "Subject + teaching-method total", p.subjectCategoryTotal, p.subjectCategoryMin, false, {codes:[...p.subjectCodes, ...p.methodCodes]}));
+      licDiv.appendChild(dashRow("教育の基礎的理解に関する科目等", "Foundational understanding of education", p.basicCredits, p.basicMin, false, {codes:p.basicCodes}));
+      licDiv.appendChild(dashRow("その他の科目（共通）", "Other required courses (shared across licenses)", otherCredits, TEACHING.other_courses.min, false, {codes:TEACHING.other_courses.required}));
+      licDiv.appendChild(dashRow("免許取得に必要な合計単位数", "Combined total required for this license", p.combinedTotal, p.combinedMin, false, {codes:[...p.subjectCodes, ...p.methodCodes, ...p.basicCodes]}));
+      body.appendChild(licDiv);
+    });
+  }
+
+  // free elective (informational)
+  const feEarned = totals.get("free_elective") || 0;
+  if(feEarned>0){
+    const feDiv = document.createElement("div");
+    feDiv.className = "dash-cat";
+    feDiv.innerHTML = `<h3>自由科目（参考） / Free Electives (info only)</h3>
+      <p class="hint">${GRADREQ.free_elective.note} — 現在 ${feEarned.toFixed(1)} 単位</p>`;
+    body.appendChild(feDiv);
+  }
+}
+// fillSource: array of GRADREQ target keys (e.g. ["natural_science"]) to look
+// up via the normal course category mapping, or {codes:[...]} for an explicit
+// course-code pool (used for teaching-license requirement rows). Either way,
+// clicking the row opens a modal listing not-yet-registered courses that would
+// count toward it, so a shortfall (e.g. 自然科学 2/4) is immediately actionable.
+function dashRow(nameJa, nameEn, earned, min, isAuto, fillSource){
+  const row = document.createElement("div");
+  row.className = "dash-row";
+  const noMin = min<=0;
+  const pct = noMin ? 0 : Math.min(100, (earned/min)*100);
+  const met = !noMin && earned >= min;
+  const minLabel = noMin ? "内数" : min;
+  row.innerHTML = `
+    <div class="dash-label">${nameJa}<small>${nameEn||""}${isAuto?" (auto)":""}</small></div>
+    <div class="dash-bar-track"><div class="dash-bar-fill ${met?"met":""}" style="width:${pct}%;"></div></div>
+    <div class="dash-num">${earned.toFixed(1)}${noMin?"":" / "+minLabel}</div>
+  `;
+  if(fillSource){
+    row.style.cursor = "pointer";
+    row.title = "クリックすると選択可能な科目の候補が表示されます";
+    row.addEventListener("click", ()=> openCategoryFillModal(nameJa, fillSource));
+  }
+  return row;
+}
+// Some categories (basic-recommended, for the 進級条件 check) count registrations
+// differently than "is this course selected at all" - fillSource.countedIds lets
+// the caller supply that category's own counted-course set instead of assuming
+// the generic countedCourseIds().
+function coursesForFillSource(fillSource, wantCounted){
+  const counted = (fillSource && fillSource.countedIds) || countedCourseIds();
+  const keep = c => wantCounted ? counted.has(c.id) : !counted.has(c.id);
+  if(Array.isArray(fillSource)){
+    return COURSES.filter(c=> fillSource.includes(mapCategoryToReq(c.category.major, c.category.minor)) && keep(c));
+  }
+  if(fillSource && fillSource.codes){
+    return fillSource.codes.map(code=>coursesByCode.get(code)).filter(c=>c && keep(c));
+  }
+  if(fillSource && fillSource.ids){
+    return Array.from(fillSource.ids).map(id=>coursesById.get(id)).filter(c=>c && keep(c));
+  }
+  return [];
+}
+function openCategoryFillModal(title, fillSource){
+  const root = document.getElementById("modal-root");
+  const render_ = ()=>{
+    const courses = coursesForFillSource(fillSource);
+    const countedCourses = coursesForFillSource(fillSource, true);
+    const autoIds = autoCompletedCourseIds(STATE.setup);
+    const countedTotal = countedCourses.reduce((s,c)=>s+(c.credits||0), 0);
+    let countedHtml = "";
+    if(countedCourses.length){
+      countedHtml = `<div class="hint" style="margin:1rem 0 .3rem; font-weight:700;">登録済み・履修済み（${countedTotal}単位）</div>
+        <div id="fill-modal-counted" class="course-list">
+          ${countedCourses.map(c=>`<div class="offer-row">
+            <span style="flex:1;">${c.code} ${c.name_ja}${courseRecommendationBadges(c)}<span class="hint"> (${c.credits}単位)</span></span>
+            <span class="hint">${autoIds.has(c.id)?"自動":"登録済み"}</span>
+          </div>`).join("")}
+        </div>`;
+    }
+    root.innerHTML = `<div class="modal-backdrop" id="fill-modal-backdrop"><div class="modal">
+      <h3 style="margin-bottom:.3rem;">${title}</h3>
+      <p class="hint" style="margin-bottom:.6rem;">まだ登録していない、この区分の単位になる科目の候補です。</p>
+      <div id="fill-modal-list" class="course-list"></div>
+      ${countedHtml}
+      <div style="text-align:right; margin-top:1rem;"><button class="btn" id="fill-modal-close">閉じる</button></div>
+      </div></div>`;
+    const list = document.getElementById("fill-modal-list");
+    if(!courses.length){
+      list.innerHTML = `<p class="hint">選択可能な候補が見つかりませんでした。</p>`;
+    } else {
+      courses.forEach(c=>{
+        const row = document.createElement("div");
+        row.className = "offer-row";
+        row.innerHTML = `<span style="flex:1;">${c.code} ${c.name_ja}${courseRecommendationBadges(c)}<span class="hint"> (${c.credits}単位・対象学年${c.target_year.join("/")})</span></span>
+          <button class="btn small primary" data-fill-add="${c.id}">登録</button>`;
+        list.appendChild(row);
+      });
+    }
+    list.querySelectorAll("[data-fill-add]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{ quickAddCourse(btn.dataset.fillAdd); render_(); });
+    });
+    document.getElementById("fill-modal-close").addEventListener("click", ()=>{ root.innerHTML=""; render(); });
+    document.getElementById("fill-modal-backdrop").addEventListener("click", ev=>{
+      if(ev.target.id==="fill-modal-backdrop"){ root.innerHTML=""; render(); }
+    });
+  };
+  render_();
+}
+
+/* ======================= TEACHING LICENSE view ======================= */
+function basicUnderstandingMarker(code, licenseKey){
+  const lic = TEACHING.licenses[licenseKey];
+  const bu = TEACHING.basic_understanding;
+  if(code===bu.moral_education_course) return lic.moral_education_required ? "○必修" : "△選択";
+  if(bu.practicum_choice.includes(code)){
+    if(licenseKey==="math_jhs") return code==="TE16" ? "○必修" : "対象外";
+    return "□選択(1・2いずれか)";
+  }
+  if(bu.common_required.includes(code)) return "○必修";
+  return "";
+}
+function teachingCourseRow(code, marker){
+  const c = coursesByCode.get(code);
+  if(!c) return "";
+  const selected = isCourseSelected(c.id);
+  return `<div class="offer-row" data-teaching-row="${code}">
+    <span style="width:9rem; flex-shrink:0; font-weight:800; color:${marker.startsWith('対象外')?'var(--text-dim)':'var(--accent)'};">${marker}</span>
+    <span style="flex:1;">${c.code} ${c.name_ja}<span class="hint"> (${c.credits}単位)</span></span>
+    ${selected
+      ? `<span class="badge" style="background:var(--accent);color:var(--gold-on-navy);">登録済み</span><span class="x" style="cursor:pointer;" data-teaching-remove="${c.id}">×</span>`
+      : `<button class="btn small primary" data-teaching-add="${c.id}">登録</button>`}
+  </div>`;
+}
+function progressBadge(earned, min){
+  const met = earned >= min;
+  return `<span class="badge" style="background:${met?"var(--gold)":"var(--accent)"};color:${met?"var(--accent)":"var(--gold-on-navy)"}; margin-left:.5rem; font-size:.75rem;">${earned.toFixed(1)} / ${min}単位</span>`;
+}
+function renderTeachingLicenseView(){
+  const body = document.getElementById("teaching-body");
+  const licenses = STATE.setup.teacherLicenses || [];
+  if(!licenses.length){
+    body.innerHTML = `<p class="hint">初期設定で教職課程（取得を目指す免許状）を選択すると、ここに必要科目の一覧が表示されます。</p>`;
+    return;
+  }
+  let html = "";
+  licenses.forEach(key=>{
+    const lic = TEACHING.licenses[key];
+    if(!lic) return;
+    const pool = key==="info_hs" ? TEACHING.subject_matter.info : TEACHING.subject_matter.math;
+    const methodMarker = key==="math_jhs" ? "◎必修(中一種)" : "▲必修(高一種)";
+    const p = computeLicenseProgress(key);
+    const otherCredits = creditsFromCodes(TEACHING.other_courses.required);
+
+    html += `<div class="dash-cat"><h3>${lic.name_ja}<br><small style="font-weight:400;">${lic.name_en}</small></h3>`;
+
+    html += `<h4>教科に関する専門的事項${progressBadge(p.subjectCredits, pool.min)}</h4>`;
+    pool.groups.forEach(g=>{
+      const groupCredits = creditsFromCodes(g.courses.map(item=>item.code));
+      html += `<div class="hint" style="font-weight:700; margin:.6rem 0 .2rem;">${g.label}<span style="font-weight:400;"> （選択中 ${groupCredits.toFixed(1)}単位）</span></div>`;
+      g.courses.forEach(item=>{
+        html += teachingCourseRow(item.code, item.mandatory ? "●必修" : "選択");
+      });
+    });
+
+    html += `<h4 style="margin-top:1rem;">各教科の指導法${progressBadge(p.methodCredits, lic.teaching_method_min)}</h4>`;
+    lic.teaching_method_courses.forEach(code=>{
+      html += teachingCourseRow(code, methodMarker);
+    });
+
+    html += `<h4 style="margin-top:1rem;">教育の基礎的理解に関する科目等${progressBadge(p.basicCredits, lic.basic_understanding_min)}</h4>`;
+    TEACHING.basic_understanding.groups.forEach(g=>{
+      const groupCredits = creditsFromCodes(g.courses);
+      html += `<div class="hint" style="font-weight:700; margin:.6rem 0 .2rem;">${g.label}<span style="font-weight:400;"> （選択中 ${groupCredits.toFixed(1)}単位）</span></div>`;
+      g.courses.forEach(code=>{
+        html += teachingCourseRow(code, basicUnderstandingMarker(code, key));
+      });
+    });
+
+    html += `<h4 style="margin-top:1rem;">その他の科目（共通）${progressBadge(otherCredits, TEACHING.other_courses.min)}</h4>`;
+    TEACHING.other_courses.required.forEach(code=>{
+      html += teachingCourseRow(code, "○必修");
+    });
+
+    html += `<p class="hint" style="margin-top:.8rem;">教科及び教科の指導法に関する科目 合計${progressBadge(p.subjectCategoryTotal, lic.subject_category_min)}</p>`;
+    html += `<p class="hint">免許取得に必要な合計単位数${progressBadge(p.combinedTotal, lic.combined_min)}</p>`;
+    html += `</div>`;
+  });
+  body.innerHTML = html;
+
+  body.querySelectorAll("[data-teaching-add]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ quickAddCourse(btn.dataset.teachingAdd); render(); });
+  });
+  body.querySelectorAll("[data-teaching-remove]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{ removeAllPlacementsForCourse(btn.dataset.teachingRemove); render(); });
+  });
+}
+
+/* ======================= export / import ======================= */
+function download(filename, text, mime){
+  const blob = new Blob([text], {type:mime||"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+// Some embedded/sandboxed environments (e.g. this app published as a Claude
+// Artifact) silently block programmatic file downloads. Always try the normal
+// download AND show the raw text in a copyable box, so there's a guaranteed
+// fallback that doesn't depend on downloads working - copy the text and paste
+// it into a notes app / file to keep it as a backup.
+function showSaveTextModal(title, text, filename, mime){
+  try{ download(filename, text, mime); }catch(e){ /* fall through to copy box below */ }
+  const root = document.getElementById("modal-root");
+  root.innerHTML = `<div class="modal-backdrop" id="save-text-backdrop"><div class="modal">
+    <h3 style="margin-bottom:.3rem;">${title}</h3>
+    <p class="hint" style="margin-bottom:.6rem;">端末へのダウンロードが動かない場合は、下のテキストをコピーしてメモアプリなどに保存してください。あとで「テキストから読込」に貼り付ければ復元できます。</p>
+    <textarea class="export-textarea" id="save-text-area" rows="10" readonly></textarea>
+    <div style="text-align:right; margin-top:1rem; display:flex; gap:.5rem; justify-content:flex-end;">
+      <button class="btn" id="save-text-copy-btn">コピーする</button>
+      <button class="btn primary" id="save-text-close-btn">閉じる</button>
+    </div>
+    </div></div>`;
+  const textarea = document.getElementById("save-text-area");
+  textarea.value = text;
+  document.getElementById("save-text-copy-btn").addEventListener("click", async ()=>{
+    const btn = document.getElementById("save-text-copy-btn");
+    try{
+      await navigator.clipboard.writeText(text);
+      btn.textContent = "コピーしました！";
+    }catch(e){
+      // Clipboard API can also be blocked in a sandbox - fall back to
+      // select-the-text-manually, which needs no special permission.
+      textarea.focus(); textarea.select();
+      btn.textContent = "選択済み・Cmd/Ctrl+Cでコピー";
+    }
+    setTimeout(()=>{ btn.textContent = "コピーする"; }, 2500);
+  });
+  const close = ()=>{ root.innerHTML = ""; };
+  document.getElementById("save-text-close-btn").addEventListener("click", close);
+  document.getElementById("save-text-backdrop").addEventListener("click", ev=>{
+    if(ev.target.id==="save-text-backdrop") close();
+  });
+}
+function csvExportText(){
+  const rows = [["学年","学期","コード","科目名(日)","科目名(en)","単位","区分","基本推奨","状態","備考"]];
+  const basicIds = basicRecommendedCourseIds(STATE.setup);
+  STATE.selections
+    .slice()
+    .sort((a,b)=> a.year-b.year || a.quarter-b.quarter)
+    .forEach(s=>{
+      const c = coursesById.get(s.courseId);
+      if(!c) return;
+      rows.push([s.year, s.quarter, c.code, c.name_ja, c.name_en, c.credits, c.category.major+"/"+c.category.minor, basicIds.has(c.id)?"○":"", s.status==="tentative"?"検討中":"確定", ""]);
+    });
+  autoCompletedCourseIds(STATE.setup).forEach(cid=>{
+    const c = coursesById.get(cid);
+    if(!c) return;
+    rows.push([AUTO_COMPLETE_YEAR, "-", c.code, c.name_ja, c.name_en, c.credits, c.category.major+"/"+c.category.minor, "○", "確定", "自動履修済み"]);
+  });
+  return rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+}
+document.getElementById("btn-export-json").addEventListener("click", ()=>{
+  showSaveTextModal("JSON書き出し", JSON.stringify(STATE, null, 2), "aizu-plan.json", "application/json");
+});
+document.getElementById("btn-export-csv").addEventListener("click", ()=>{
+  showSaveTextModal("CSV書き出し", "﻿"+csvExportText(), "aizu-plan.csv", "text/csv");
+});
+function importStateFromJSON(text){
+  const parsed = JSON.parse(text);
+  STATE = Object.assign(defaultState(), parsed);
+  (STATE.selections||[]).forEach(s=>{ if(s.status!=="confirmed" && s.status!=="tentative") s.status = "confirmed"; });
+  saveState();
+  fillSetupForm();
+  render();
+}
+document.getElementById("btn-import").addEventListener("click", ()=>{
+  const root = document.getElementById("modal-root");
+  root.innerHTML = `<div class="modal-backdrop" id="import-backdrop"><div class="modal">
+    <h3 style="margin-bottom:.3rem;">読込 / Import</h3>
+    <p class="hint" style="margin-bottom:.6rem;">JSON書出で保存したファイルを選ぶか、コピーしておいたテキストを下に貼り付けてください。</p>
+    <button class="btn" id="import-file-btn" style="margin-bottom:.8rem;">ファイルを選択</button>
+    <textarea class="export-textarea" id="import-text-area" rows="8" placeholder="ここにJSONテキストを貼り付け"></textarea>
+    <div style="text-align:right; margin-top:1rem; display:flex; gap:.5rem; justify-content:flex-end;">
+      <button class="btn" id="import-cancel-btn">キャンセル</button>
+      <button class="btn primary" id="import-text-btn">このテキストを読み込む</button>
+    </div>
+    </div></div>`;
+  const close = ()=>{ root.innerHTML = ""; };
+  document.getElementById("import-file-btn").addEventListener("click", ()=>document.getElementById("file-import").click());
+  document.getElementById("import-text-btn").addEventListener("click", ()=>{
+    const text = document.getElementById("import-text-area").value.trim();
+    if(!text) return;
+    try{
+      importStateFromJSON(text);
+      close();
+      showAlert("読み込みました / Imported successfully");
+    }catch(e){ showAlert("読み込みに失敗しました / Import failed: "+e.message); }
+  });
+  document.getElementById("import-cancel-btn").addEventListener("click", close);
+  document.getElementById("import-backdrop").addEventListener("click", ev=>{
+    if(ev.target.id==="import-backdrop") close();
+  });
+});
+document.getElementById("file-import").addEventListener("change", ev=>{
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      importStateFromJSON(reader.result);
+      document.getElementById("modal-root").innerHTML = "";
+      showAlert("読み込みました / Imported successfully");
+    }catch(e){ showAlert("読み込みに失敗しました / Import failed: "+e.message); }
+  };
+  reader.readAsText(file);
+});
+document.getElementById("btn-reset").addEventListener("click", ()=>{
+  showConfirm("すべてのデータを削除します。よろしいですか？ / This will erase all saved data. Continue?", ()=>{
+    STATE = defaultState();
+    saveState();
+    fillSetupForm();
+    showView("setup");
+  });
+});
+
+/* ======================= master render ======================= */
+function render(){
+  if(currentView==="setup") fillSetupForm();
+  else if(currentView==="search") renderTimelinePlanner();
+  else if(currentView==="timetable") renderTimetable();
+  else if(currentView==="plan") renderPlan();
+  else if(currentView==="dashboard") renderDashboard();
+  else if(currentView==="teaching") renderTeachingLicenseView();
+}
+
+/* ======================= init ======================= */
+fillSetupForm();
+showView(STATE.setup.done ? "plan" : "setup");
+</script>
+</body>
+</html>
