@@ -166,6 +166,7 @@ FIELD_LABELS = {
     "track": "推奨トラック",
     "essential": "先修科目",
     "outline": "授業の概要",
+    "grading": "成績評価の方法・基準",
 }
 
 
@@ -206,6 +207,7 @@ def parse_category_ja(path):
         essential_raw = field(FIELD_LABELS["essential"])
         essential = parse_essential_courses(essential_raw)
         outline = field(FIELD_LABELS["outline"])
+        grading = field(FIELD_LABELS["grading"])
 
         records[anchor] = {
             "code": code,
@@ -218,6 +220,7 @@ def parse_category_ja(path):
             "instructors": instructors,
             "essential_courses": essential,
             "outline": outline,
+            "grading": grading,
         }
     return records
 
@@ -271,6 +274,7 @@ def main():
             "instructors": rec["instructors"],
             "essential_courses": rec["essential_courses"],
             "outline": rec["outline"],
+            "grading": rec["grading"],
         })
 
     # anchors present in category pages but missing from index (rare) -> append too
@@ -290,6 +294,7 @@ def main():
                 "instructors": rec["instructors"],
                 "essential_courses": rec["essential_courses"],
                 "outline": rec["outline"],
+                "grading": rec["grading"],
             })
 
     # crps-verified prerequisites supersede the syllabus scrape entirely (see
