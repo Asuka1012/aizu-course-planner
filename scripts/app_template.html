@@ -1583,7 +1583,9 @@ function renderDashboard(){
     }
     const catFillKeys = cat.auto ? null : (cat.subcategories && cat.subcategories.length ? cat.subcategories.map(s=>s.key) : [cat.key]);
     catDiv.appendChild(dashRow(cat.name_ja, cat.name_en, catEarned, cat.min, cat.auto, catFillKeys));
-    (cat.subcategories||[]).forEach(sub=>{
+    // 専門科目（その他・内数）は実質的な要件を持たない(min:0)内訳集計に過ぎず、
+    // 表示上は不要なので出さない（専門教育科目の合計計算には引き続き含める）。
+    (cat.subcategories||[]).filter(sub=>sub.key!=="specialized_other").forEach(sub=>{
       const subEarned = totals.get(sub.key) || 0;
       const row = dashRow(sub.name_ja, sub.name_en, subEarned, sub.min, false, [sub.key]);
       row.classList.add("dash-sub");
