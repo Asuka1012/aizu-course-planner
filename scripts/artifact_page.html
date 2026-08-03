@@ -954,8 +954,10 @@ function renderSearchBanners(){
   if(prereq.length){
     const div = document.createElement("div");
     div.className = "banner warn";
-    const rows = prereq.slice(0,5).map(p=>`${p.course.code} ${p.course.name_ja} → 先修: ${p.missing.map(m=>m.code).join(", ")}`).join("、");
-    div.innerHTML = `<div class="banner-body"><div class="banner-title">先修科目が未充足の科目があります</div><div>${rows}</div></div>`;
+    const missingMap = new Map();
+    prereq.forEach(p=>p.missing.forEach(m=>{ if(!missingMap.has(m.id)) missingMap.set(m.id, m); }));
+    const rows = Array.from(missingMap.values()).slice(0,6).map(m=>`${m.code} ${m.name}`).join("、");
+    div.innerHTML = `<div class="banner-body"><div class="banner-title">不足している先修科目</div><div>${rows}${missingMap.size>6?" 他":""}</div></div>`;
     box.appendChild(div);
   }
 }
