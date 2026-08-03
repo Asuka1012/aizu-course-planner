@@ -1750,7 +1750,7 @@ function teachingCourseRow(code, marker){
 }
 function progressBadge(earned, min){
   const met = earned >= min;
-  return `<span class="badge" style="background:${met?"var(--gold)":"var(--accent)"};color:${met?"var(--accent)":"var(--gold-on-navy)"}; margin-left:.5rem; font-size:.75rem;">${earned.toFixed(1)} / ${min}単位</span>`;
+  return `<span class="badge" style="background:${met?"var(--accent)":"var(--gold)"};color:${met?"var(--gold-on-navy)":"var(--accent)"}; margin-left:.5rem; font-size:.75rem;">${earned.toFixed(1)} / ${min}単位</span>`;
 }
 function renderTeachingLicenseView(){
   const body = document.getElementById("teaching-body");
