@@ -1556,7 +1556,7 @@ function renderDashboard(){
   body.innerHTML = `<p class="hint">※ 1年 第1・第2学期は大学側の標準クラス編成のため、基本推奨科目は自動的にカウントされます。それ以外は「履修計画」に追加（履修登録）した科目のみがカウントされます。</p>
     <div class="dash-cat" style="margin-bottom:1.2rem;">
       <h3>進級条件 / Year-Advancement Requirement</h3>
-      <p class="hint">2年後期（Q4）までに基本推奨科目から${PROMOTION_MIN_BASIC_CREDITS}単位以上の取得が進級条件です。3年次以降に履修した基本推奨科目はここにはカウントされません。</p>
+      <p class="hint">2年後期（Q4）までに基本推奨科目から${PROMOTION_MIN_BASIC_CREDITS}単位以上の取得が進級条件です。</p>
     </div>`;
   body.appendChild(dashRow("基本推奨科目からの履修単位", "Credits from basic-recommended courses", basicCredits, PROMOTION_MIN_BASIC_CREDITS, false, {ids:basicRecommendedCourseIds(STATE.setup), countedIds:basicRecommendedCountedIds()}));
 
