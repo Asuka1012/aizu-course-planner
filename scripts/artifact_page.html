@@ -91,20 +91,18 @@ select,input[type=text]{
 .radio-row label{display:flex; align-items:center; gap:.3rem; cursor:pointer;}
 
 .banner{
-  border-radius:var(--radius); padding:.7rem 1rem; margin-bottom:.7rem; display:flex; gap:.7rem; align-items:flex-start;
-  border:1px solid; flex-wrap:wrap;
+  border-radius:var(--radius); padding:.4rem .7rem; margin-bottom:.5rem; display:flex; gap:.5rem; align-items:baseline;
+  border:1px solid; flex-wrap:wrap; font-size:.8rem; line-height:1.4;
 }
 .banner.field{background:var(--gold-dim); border-color:var(--gold); color:var(--text);}
 .banner.warn{background:var(--danger-dim); border-color:var(--danger); color:var(--text);}
-.banner .banner-body{flex:1; min-width:220px;}
-.banner .banner-title{font-weight:800; margin-bottom:.2rem;}
+.banner .banner-body{flex:1; min-width:220px; display:flex; flex-wrap:wrap; gap:.4rem; align-items:baseline;}
+.banner .banner-title{font-weight:800; white-space:nowrap;}
 .badge{display:inline-block; font-size:.7rem; font-weight:800; border-radius:3px; padding:.1rem .45rem; margin-left:.3rem; white-space:nowrap; letter-spacing:.02em;}
 .badge.basic{color:#fff; background:var(--basic-accent);}
 .badge.field{color:var(--field-text); background:transparent; border:1px solid var(--field-accent);}
 .badge.te{color:var(--text-dim); background:transparent; border:1px solid var(--border);}
 
-.search-row{display:flex; gap:.6rem; margin-bottom:.6rem; flex-wrap:wrap;}
-.search-row input[type=text]{flex:2; min-width:220px;}
 .filters{display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-start; margin-bottom:.8rem;}
 .filter-group{background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:.5rem .7rem;}
 .filter-group .fg-title{font-size:.72rem; font-weight:800; color:var(--text-dim); margin-bottom:.3rem; text-transform:uppercase;}
@@ -295,9 +293,6 @@ footer.app-footer{text-align:center; color:var(--text-dim); font-size:.75rem; pa
   <div class="panel">
     <h2>履修計画表 / Course Plan Timeline</h2>
     <div id="search-banners"></div>
-    <div class="search-row" style="align-items:center;">
-      <input type="text" id="search-input" placeholder="科目コード・科目名（日本語/English）で検索するとハイライトされます / Search highlights matching courses">
-    </div>
     <div class="tl-legend">
       <span><span class="tl-swatch basic"></span>基本推奨</span>
       <span><span class="tl-swatch field"></span>フィールド推奨</span>
@@ -1112,7 +1107,6 @@ function showConfirm(message, onConfirm){
 }
 function renderTimelinePlanner(){
   renderSearchBanners();
-  const query = document.getElementById("search-input").value.trim().toLowerCase();
   const autoCompleted = autoCompletedCourseIds(STATE.setup);
   const halfTotals = computeHalfYearTotals();
   const licenseCodes = licenseRelevantCodes();
@@ -1182,7 +1176,6 @@ function renderTimelinePlanner(){
         const isAuto = autoCompleted.has(c.id);
         const offs = matchedOfferingsForStudent(c.id, STATE.setup);
         const rec = offs.some(o=>o.recommendation==="basic") ? "basic" : offs.some(o=>o.recommendation==="field") ? "field" : "";
-        const matchesQuery = !query || (c.code+" "+c.name_ja+" "+c.name_en).toLowerCase().includes(query);
         const isPrereq = prereqCodes && prereqCodes.has(c.code);
         const isLicense = licenseCodes.has(c.code);
         const chip = document.createElement("div");
@@ -1193,9 +1186,11 @@ function renderTimelinePlanner(){
           + (isPrereq ? " prereq-highlight" : "")
           + (isLicense ? " license-required" : "")
           + (isTentative ? " tentative" : "");
-        if(!matchesQuery) chip.style.opacity = "0.3";
         chip.dataset.courseId = c.id;
-        chip.title = (c.name_en||"") + (isLicense?"（選択中の教員免許状の必要科目）":"") + (isTentative?"（検討中）":"");
+        chip.title = (c.name_en||"")
+          + (rec==="basic"?"（基本推奨科目）":rec==="field"?"（フィールド推奨科目）":"")
+          + (isLicense?"（選択中の教員免許状の必要科目）":"")
+          + (isTentative?"（検討中）":"");
         chip.textContent = c.code+" "+c.name_ja+(pos.intensive?"（集中）":"");
         cell.appendChild(chip);
       });
@@ -1232,7 +1227,6 @@ function renderTimelinePlanner(){
   // (now-internal) scroll pane back to the top on every selection/highlight.
   if(wrap){ wrap.scrollTop = prevScrollTop; wrap.scrollLeft = prevScrollLeft; }
 }
-document.getElementById("search-input").addEventListener("input", renderTimelinePlanner);
 
 /* ======================= TIMETABLE view ======================= */
 function renderTimetable(){
