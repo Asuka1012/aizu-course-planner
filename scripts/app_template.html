@@ -1627,15 +1627,6 @@ function renderDashboard(){
     });
   }
 
-  // free elective (informational)
-  const feEarned = totals.get("free_elective") || 0;
-  if(feEarned>0){
-    const feDiv = document.createElement("div");
-    feDiv.className = "dash-cat";
-    feDiv.innerHTML = `<h3>自由科目（参考） / Free Electives (info only)</h3>
-      <p class="hint">${GRADREQ.free_elective.note} — 現在 ${feEarned.toFixed(1)} 単位</p>`;
-    body.appendChild(feDiv);
-  }
 }
 // fillSource: array of GRADREQ target keys (e.g. ["natural_science"]) to look
 // up via the normal course category mapping, or {codes:[...]} for an explicit
