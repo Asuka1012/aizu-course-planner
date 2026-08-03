@@ -960,8 +960,8 @@ function renderSearchBanners(){
   if(prereq.length){
     const div = document.createElement("div");
     div.className = "banner warn";
-    const rows = prereq.slice(0,5).map(p=>`${p.course.code} ${p.course.name_ja} → 先修: ${p.missing.map(m=>m.code).join(", ")}`).join("<br>");
-    div.innerHTML = `<div class="banner-body"><div class="banner-title">先修科目が未充足の科目があります / Prerequisite courses missing</div>${rows}</div>`;
+    const rows = prereq.slice(0,5).map(p=>`${p.course.code} ${p.course.name_ja} → 先修: ${p.missing.map(m=>m.code).join(", ")}`).join("、");
+    div.innerHTML = `<div class="banner-body"><div class="banner-title">先修科目が未充足の科目があります</div><div>${rows}</div></div>`;
     box.appendChild(div);
   }
 }
